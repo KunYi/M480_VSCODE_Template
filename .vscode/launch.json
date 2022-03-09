@@ -20,9 +20,16 @@
             "interface": "swd",
             "serialNumber": "",
             "runToEntryPoint": "main",
-            "preLaunchTask": "Flash",
+            // use NuLink Command tools to flash application binary
+            //"preLaunchTask": "Flash",
             "svdFile": "${workspaceRoot}//device//M481_V1.svd",
-            "showDevDebugOutput": "none"
+            "showDevDebugOutput": "none",
+            // to flash application by GDB/OpenOCD/NuLink
+            "preLaunchCommands": [
+                "monitor reset init",
+                // use openOCD to flash application binary into APROM
+                "monitor flash write_image erase build//M480_Template.bin"
+            ]
         }
     ]
 }
