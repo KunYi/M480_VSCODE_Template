@@ -14,6 +14,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
 include(m480bsp.cmake)
+include(freertos.cmake)
 
 set(SRC_FILES
     src/main.c
@@ -22,7 +23,7 @@ set(SRC_FILES
 # Build the executable based on the source files
 add_executable(${EXECUTABLE} ${SRC_FILES})
 
-target_link_libraries(${EXECUTABLE} m480bsp)
+target_link_libraries(${EXECUTABLE} m480bsp freertos)
 
 # List of includ directories
 target_include_directories(${EXECUTABLE} PRIVATE

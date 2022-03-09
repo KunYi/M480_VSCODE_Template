@@ -7,7 +7,7 @@
         {
             "cwd": "${workspaceRoot}",
             "executable": "build//M480_Template.elf",
-            "name": "Debug Microcontroller",
+            "name": "OpeonOCD(NuLink) M480",
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "openocd",
@@ -29,7 +29,8 @@
                 "monitor reset init",
                 // use openOCD to flash application binary into APROM
                 "monitor flash write_image erase build//M480_Template.bin"
-            ]
+            ],
+            "rtos": "FreeRTOS"
         }
     ]
 }

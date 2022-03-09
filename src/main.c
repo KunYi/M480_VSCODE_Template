@@ -1,10 +1,14 @@
 
 #include <stdio.h>
+
+#include "FreeRTOS.h"
+#include "task.h"
+#include "timers.h"
+#include "semphr.h"
+
 #include "NuMicro.h"
 
-#define PLL_CLOCK           192000000
-
-void SYS_Init(void)
+static void SYS_Init(void)
 {
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
@@ -22,7 +26,7 @@ void SYS_Init(void)
     CLK_WaitClockReady(CLK_STATUS_HXTSTB_Msk);
 
     /* Set core clock as PLL_CLOCK from PLL */
-    CLK_SetCoreClock(PLL_CLOCK);
+    CLK_SetCoreClock(FREQ_192MHZ);
     /* Set PCLK0/PCLK1 to HCLK/2 */
     CLK->PCLKDIV = (CLK_PCLKDIV_APB0DIV_DIV2 | CLK_PCLKDIV_APB1DIV_DIV2);
 
@@ -39,8 +43,52 @@ void SYS_Init(void)
     /* Set GPB multi-function pins for UART0 RXD and TXD */
     SYS->GPB_MFPH &= ~(SYS_GPB_MFPH_PB12MFP_Msk | SYS_GPB_MFPH_PB13MFP_Msk);
     SYS->GPB_MFPH |= (SYS_GPB_MFPH_PB12MFP_UART0_RXD | SYS_GPB_MFPH_PB13MFP_UART0_TXD);
+
+    /* set GPIOH for LED */
+    PH->MODE = (PH->MODE & ~(GPIO_MODE_MODE0_Msk | GPIO_MODE_MODE1_Msk | GPIO_MODE_MODE2_Msk)) |
+               (GPIO_MODE_OUTPUT << GPIO_MODE_MODE0_Pos) |
+               (GPIO_MODE_OUTPUT << GPIO_MODE_MODE1_Pos) |
+               (GPIO_MODE_OUTPUT << GPIO_MODE_MODE2_Pos);  // Set to output mode
+    PH->DOUT = 3;
+
     /* Lock protected registers */
     SYS_LockReg();
+}
+
+/* Task to be created. */
+void vLEDToggleTask( void * pvParameters )
+{
+    /* The parameter value is expected to be 1 as 1 is passed in the
+    pvParameters value in the call to xTaskCreate() below.
+    */
+    configASSERT( ( ( uint32_t ) pvParameters ) == 1 );
+
+    for( ;; )
+    {
+        /* Task code goes here. */
+        static short i = 0;
+        PH->DOUT = (i++ & 0x7); // total 3 LEDs
+        vTaskDelay(200);
+    }
+}
+
+static void prepareTasks(void)
+{
+    BaseType_t xReturned;
+    TaskHandle_t xHandle = NULL;
+
+    /* Create the task, storing the handle. */
+    xReturned = xTaskCreate(
+                    vLEDToggleTask,  /* Function that implements the task. */
+                    "LEDToggle",     /* Text name for the task. */
+                    100,             /* Stack size in words, not bytes. */
+                    ( void * ) 1,    /* Parameter passed into the task. */
+                    tskIDLE_PRIORITY,/* Priority at which the task is created. */
+                    &xHandle );      /* Used to pass out the created task's handle. */
+
+    if( xReturned == pdPASS ) {
+
+    }
 }
 
 int main(void) {
@@ -49,9 +97,55 @@ int main(void) {
 
     UART_Open(UART0, 115200);
     /* Connect UART to PC, and open a terminal tool to receive following message */
-    printf("Hello World\n");
+    prepareTasks();
+
+    printf("FreeRTOS is starting ...\n");
+
+    /* Start the scheduler. */
+    vTaskStartScheduler();
 
     for(;;)
     {}
     return 0;
+}
+
+/*-----------------------------------------------------------*/
+void vApplicationStackOverflowHook( TaskHandle_t xTask, char * pcTaskName )
+{
+    ( void ) pcTaskName;
+    ( void ) xTask;
+
+    /* Run time stack overflow checking is performed if
+    configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
+    function is called if a stack overflow is detected. */
+    taskDISABLE_INTERRUPTS();
+    for( ;; );
+}
+
+/*-----------------------------------------------------------*/
+void vApplicationTickHook( void )
+{
+    /* This function will be called by each tick interrupt if
+    configUSE_TICK_HOOK is set to 1 in FreeRTOSConfig.h.  User code can be
+    added here, but the tick hook is called from an interrupt context, so
+    code must not attempt to block, and only the interrupt safe FreeRTOS API
+    functions can be used (those that end in FromISR()).  */
+
+    {
+        /* In this case the tick hook is used as part of the queue set test. */
+        /* vQueueSetAccessQueueSetFromISR(); */
+    }
+}
+
+/*-----------------------------------------------------------*/
+void vApplicationIdleHook(void)
+{
+
+}
+
+/*-----------------------------------------------------------*/
+void vApplicationMallocFailedHook(void)
+{
+    taskDISABLE_INTERRUPTS();
+    for( ;; );
 }
