@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "cwd": "${workspaceRoot}",
+            "executable": "build//M480_Template.elf",
+            "name": "Debug Microcontroller",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "configFiles": [
+                "interface//nulink.cfg",
+                "target//numicroM4.cfg"
+            ],
+            "serverpath": "C://Users//kunic//OpenOCD_Nuvton//bin//openocd.exe",
+            "armToolchainPath": "C://Program Files (x86)//GNU Arm Embedded Toolchain//10 2021.10//bin",
+            "interface": "swd",
+            "serialNumber": "",
+            "runToEntryPoint": "main",
+            "preLaunchTask": "Flash",
+            "svdFile": "${workspaceRoot}//device//M481_V1.svd",
+            "showDevDebugOutput": "none"
+        }
+    ]
+}

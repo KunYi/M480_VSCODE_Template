@@ -1,0 +1,49 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Build Project",
+            "command": "cmake --build .",
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": ["relative", "${workspaceFolder}/build"]
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Clean & Build",
+            "command": "cmake --build . --clean-first",
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+            "group": "build",
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": ["relative", "${workspaceFolder}/build"]
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Flash",
+            "command": "${workspaceFolder}\\flash.cmd ${workspaceFolder}\\build\\M480_Template.bin",
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+            "group": "build",
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": ["relative", "${workspaceFolder}/build"]
+            }
+        }
+    ]
+}
