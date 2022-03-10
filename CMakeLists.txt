@@ -8,6 +8,20 @@ project(M480_Template)
 set(EXECUTABLE ${PROJECT_NAME}.elf)
 set(LINKER_FILE ${CMAKE_SOURCE_DIR}/M480BSP/Library/Device/Nuvoton/M480/Source/GCC/gcc_arm.ld)
 
+set(DEFINE_COMPILE_FLAGS
+    -mcpu=cortex-m4
+    -mthumb
+    -mfpu=fpv4-sp-d16
+    -mfloat-abi=hard
+
+    -fdata-sections
+    -ffunction-sections
+
+    -Wall
+    -O0
+    -g3
+)
+
 enable_language(C ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -15,36 +29,34 @@ set(CMAKE_C_EXTENSIONS ON)
 
 include(m480bsp.cmake)
 include(freertos.cmake)
+include(lwip.cmake)
 
 set(SRC_FILES
     src/main.c
+    port/lwip/sys_arch.c
+    port/lwip/netif/ethernetif.c
+    port/lwip/netif/m480_eth.c
 )
 
 # Build the executable based on the source files
 add_executable(${EXECUTABLE} ${SRC_FILES})
 
-target_link_libraries(${EXECUTABLE} m480bsp freertos)
+target_link_libraries(${EXECUTABLE}
+        m480bsp
+        freertos
+        lwip
+)
 
 # List of includ directories
 target_include_directories(${EXECUTABLE} PRIVATE
-        src
+        inc
         m480bsp
-        )
+        lwip
+)
 
 # Compiler options
 target_compile_options(${EXECUTABLE} PRIVATE
-        -mcpu=cortex-m4
-        -mthumb
-        -mfpu=fpv4-sp-d16
-        -mfloat-abi=hard
-
-        -fdata-sections
-        -ffunction-sections
-
-        -Wall
-        -O0
-        -g3
-
+        ${DEFINE_COMPILE_FLAGS}
         )
 
 # Linker options

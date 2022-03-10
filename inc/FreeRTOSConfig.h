@@ -68,6 +68,8 @@
 #define configUSE_COUNTING_SEMAPHORES	1
 #define configGENERATE_RUN_TIME_STATS	0
 
+#define configNUM_THREAD_LOCAL_STORAGE_POINTERS		( 8 )
+
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES 		0
 #define configMAX_CO_ROUTINE_PRIORITIES ( 2 )
@@ -87,6 +89,8 @@ to exclude the API function. */
 #define INCLUDE_vTaskSuspend			1
 #define INCLUDE_vTaskDelayUntil			1
 #define INCLUDE_vTaskDelay				1
+#define INCLUDE_xTaskAbortDelay                 1
+#define INCLUDE_xTaskGetCurrentTaskHandle		1
 
 /* Cortex-M specific definitions. */
 #ifdef __NVIC_PRIO_BITS
