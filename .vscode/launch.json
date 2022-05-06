@@ -16,6 +16,8 @@
                 "target//numicroM4.cfg"
             ],
             "serverpath": "C://Users//kunic//OpenOCD_Nuvton//bin//openocd.exe",
+            // log level of openocd
+            // "serverArgs": "-d3",
             "armToolchainPath": "C://Program Files (x86)//GNU Arm Embedded Toolchain//10 2021.10//bin",
             "interface": "swd",
             "serialNumber": "",
@@ -24,13 +26,16 @@
             //"preLaunchTask": "Flash",
             "svdFile": "${workspaceRoot}//device//M481_V1.svd",
             "showDevDebugOutput": "none",
-            // to flash application by GDB/OpenOCD/NuLink
-            "preLaunchCommands": [
-                "monitor reset init",
-                // use openOCD to flash application binary into APROM
-                "monitor flash write_image erase build//M480_Template.bin"
-            ],
-            "rtos": "FreeRTOS"
+            "rtos": "FreeRTOS",
+            "overrideLaunchCommands": [
+                "set mem inaccessible-by-default off",
+                "-enable-pretty-printing",
+                "set remotetimeout 15",
+                "monitor reset halt",
+                // to flash application by GDB/OpenOCD/NuLink
+                "monitor flash write_image erase build//M480_Template.bin",
+                "monitor reset halt",
+            ]
         }
     ]
 }
