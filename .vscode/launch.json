@@ -15,6 +15,7 @@
                 "interface//nulink.cfg",
                 "target//numicroM4.cfg"
             ],
+            //"serverpath": "C://Users//kunic//openocd-v0.11.0//bin//openocd.exe",
             "serverpath": "C://Users//kunic//OpenOCD_Nuvton//bin//openocd.exe",
             // log level of openocd
             // "serverArgs": "-d3",
