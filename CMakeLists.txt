@@ -33,6 +33,7 @@ include(lwip.cmake)
 
 set(SRC_FILES
     src/main.c
+    src/webserver.c
     port/lwip/sys_arch.c
     port/lwip/netif/ethernetif.c
     port/lwip/netif/m480_eth.c
