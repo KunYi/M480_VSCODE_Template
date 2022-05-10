@@ -31,10 +31,10 @@
             "overrideLaunchCommands": [
                 "set mem inaccessible-by-default off",
                 "-enable-pretty-printing",
-                "set remotetimeout 15",
+                // "set remotetimeout 15",
                 "monitor reset halt",
                 // to flash application by GDB/OpenOCD/NuLink
-                "monitor flash write_image erase build//M480_Template.bin",
+                // "monitor flash write_image erase build//M480_Template.bin",
                 "monitor reset halt",
             ]
         }

@@ -7,6 +7,7 @@
 #include "semphr.h"
 
 #include "NuMicro.h"
+#include "lwip/apps/httpd.h"
 #include "main.h"
 
 static void SYS_Init(void)
@@ -117,11 +118,13 @@ static void prepareTasks(void)
 int main(void) {
     /* Init System, IP clock and multi-function I/O */
     SYS_Init();
+    initDefaultCFG();
     initNetwork();
     UART_Open(UART0, 115200);
     /* Connect UART to PC, and open a terminal tool to receive following message */
     prepareTasks();
 
+    ssi_ex_init();
     httpd_init();
     printf("FreeRTOS is starting ...\n");
 

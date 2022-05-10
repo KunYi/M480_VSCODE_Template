@@ -56,9 +56,21 @@
 #define LWIP_TIMEVAL_PRIVATE            0
 #endif
 
-#define HTTPD_SUPPORT           1
-#define HTTPD_USE_MEM_POOL      0
-#define LWIP_HTTPD_SUPPORT_POST 0
+#define HTTPD_SUPPORT               1
+#define HTTPD_USE_MEM_POOL          0
+#define LWIP_HTTPD_SUPPORT_POST     0
+#define LWIP_HTTPD_CGI              1
+#define LWIP_HTTPD_SSI              1
+#define LWIP_HTTPD_CGI_SSI          1
+#define HTTPD_USE_CUSTOM_FSDATA     0
+#define LWIP_HTTPD_SSI_MULTIPART    1
+#define HTTPD_SERVER_AGENT          "uwingstech.com"
+/*
+ * makefsdata.exe -defl with static header
+ * normal better dynamic headers 'makefsdata -e'
+*/
+#define LWIP_HTTPD_DYNAMIC_HEADERS  0
+
 
 /* tcpip_thread should run on HIGH priority */
 #define TCPIP_THREAD_NAME             "lwIP"
@@ -77,13 +89,16 @@
 #define TCP_RCV_SCALE                 1
 #define MEMP_NUM_NETDB                4
 
+/* disable sequential API */
+#define LWIP_NETCONN                  0
 /*
  *-----------------------------
  * Socket options
  * ----------------------------
  */
 #define LWIP_NETBUF_RECVINFO          1
-#define LWIP_SOCKET                   1
+/* disable socket API */
+#define LWIP_SOCKET                   0
 
 /*fix reuse address issue */
 #define SO_REUSE                      1

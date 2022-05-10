@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>UxConn Configuration &amp; Status</title>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
+    <script src="javascript.js" charset="utf-8"></script>
+  </head>
+  <body>
+    <div id="heading">
+      <table width="100%">
+        <tr>
+          <td>
+            <a id="heading_uwings" target="_" href="">
+              <img src="uwings.png" alt="UWings Technologies">
+            </a>
+          </td>
+          <td width="100%">
+            <div id="heading_h1">
+              UxConn
+            </div>
+            <div id="heading_h2">
+              Serial to Ethernet
+            </div>
+          </td>
+          <td>
+            <a id="heading_uxconn" target="_" href="">
+            </a>
+          </td>
+        </tr>
+      </table>
+      <hr><hr>
+    </div>
+    <div id="menu">
+      <ul>
+        <li><a href="uxconn.shtm" id="UxConn">UxConn Status</a></li>
+        <li><a href="config1.shtm" id="config1">UxConn Port 0 Settings</a></li>
+        <li><a href="config2.shtm" id="config2">UxConn Port 1 Settings</a></li>
+        <li><a href="misc.shtm" id="misc">UxConn Miscellaneous Settings</a></li>
+      </ul>
+    </div>
+    <div id="content">
+      <table width="100%">
+        <tbody>
+          <tr>
+            <td align="left" valign="top" width="75%">
+              <center> <h2 align="center">UxConn Status</h2> </center>
+              <hr size="2" width="100%">
+              <table>
+                <tbody>
+                  <tr>
+                    <td class="gr">Name:</td>
+                    <td><b><!--#modname--></b></td>
+                  </tr>
+                  <tr>
+                    <td class="gr" width="25%">IP Address:</td>
+                    <td><!--#ipaddr--></td>
+                  </tr>
+                  <tr>
+                    <td class="gr">MAC Address:</td>
+                    <td><!--#macaddr--></td>
+                  </tr>
+                </tbody>
+              </table>
+              <h3>Current port settings:</h3>
+              <table width="100%" border="0" cellpadding="2" cellspacing="2">
+                <tbody>
+                  <tr>
+                    <td class="gr" width="20%"></td>
+                    <td class="grey" align="center">Port 0</td>
+                    <td class="grey" align="center">Port 1</td>
+                  </tr>
+                  <tr>
+                    <td class="gr">Baud Rate: </td>
+                    <td align="center"><!--#p0br--> bits/second</td>
+                    <td align="center"><!--#p1br--> bits/second</td>
+                  </tr>
+                  <tr>
+                    <td class="gr">Data Size: </td>
+                    <td align="center"><!--#p0dl--> bits/character</td>
+                    <td align="center"><!--#p1dl--> bits/character</td>
+                  </tr>
+                  <tr>
+                    <td class="gr">Parity: </td>
+                    <td align="center"><!--#p0p--></td>
+                    <td align="center"><!--#p1p--></td>
+                  </tr>
+                  <tr>
+                    <td class="gr"">Stop Bits: </td>
+                    <td align="center"><!--#p0sb--> bit(s)</td>
+                    <td align="center"><!--#p1sb--> bit(s)</td>
+                  </tr>
+                  <tr>
+                    <td class="gr">Flow Control: </td>
+                    <td align="center"><!--#p0fc--></td>
+                    <td align="center"><!--#p1fc--></td>
+                  </tr>
+                  <tr>
+                    <td class="gr">Local Telnet Port Number: </td>
+                    <td align="center"><!--#p0tlp--></td>
+                    <td align="center"><!--#p1tlp--></td>
+                  </tr>
+                  <tr>
+                    <td class="gr">Remote Telnet Port Number: </td>
+                    <td align="center"><!--#p0trp--></td>
+                    <td align="center"><!--#p1trp--></td>
+                  </tr>
+                  <tr>
+                    <td class="gr">Telnet Mode:</td>
+                    <td align="center"><!--#p0tnm--></td>
+                    <td align="center"><!--#p1tnm--></td>
+                  </tr>
+                  <tr>
+                    <td class="gr">Telnet Protocol:</td>
+                    <td align="center"><!--#p0prot--></td>
+                    <td align="center"><!--#p1prot--></td>
+                  </tr>
+                  <tr>
+                    <td class="gr">Telnet Server IP: </td>
+                    <td align="center"><!--#p0tip--></td>
+                    <td align="center"><!--#p1tip--></td>
+                  </tr>
+                  <tr>
+                    <td class="gr">Telnet Timeout: </td>
+                    <td align="center"><!--#p0tt--> seconds</td>
+                    <td align="center"><!--#p1tt--> seconds</td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="footing">
+      <hr><hr>
+        2022 Uwings Technologies.  All rights reserved.
+    </div>
+  </body>
+</html>

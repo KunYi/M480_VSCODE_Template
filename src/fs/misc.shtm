@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>UxConn Miscellaneous Settings</title>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
+    <script src="javascript.js" charset="utf-8"></script>
+    <!--#misvars-->
+  </head>
+  <body onload="SetMiscFormDefaults();">
+    <table width="100%">
+      <tbody>
+        <tr>
+          <td align="left" valign="top" width="75%">
+            <center>
+              <h2 align="center">UxConn Miscellaneous Settings</h2>
+            </center>
+            <hr size="2" width="100%">
+            <table>
+              <tbody>
+                <tr>
+                  <td class="gr">Name:</td>
+                  <td><b><!--#modname--></b></td>
+                </tr>
+                <tr>
+                  <td class="gr" width="25%">IP Address:</td>
+                  <td><!--#ipaddr--></td>
+                </tr>
+                <tr>
+                  <td class="gr">MAC Address:</td>
+                  <td><!--#macaddr--></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h3>IP Address Selection</h3>
+            <form action="ip.cgi" method="get" name="ip">
+              <table border="1" cellpadding="2" cellspacing="2" width="100%">
+                <tbody>
+                  <tr>
+                    <td class="gr">Address Type:&nbsp;</td>
+                    <td>
+                      <select size="1" name="staticip" onchange="SetIPState();">
+                        <option value="0">DHCP/AutoIP</option>
+                        <option value="1">Static IP</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="gr">Static IP Address:&nbsp;</td>
+                    <td>
+                      <input maxlength="3" size="3" name="sip1">.
+                      <input maxlength="3" size="3" name="sip2">.
+                      <input maxlength="3" size="3" name="sip3">.
+                      <input maxlength="3" size="3" name="sip4">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="gr">Subnet Mask:&nbsp; </td>
+                    <td>
+                      <input maxlength="3" size="3" name="mip1">.
+                      <input maxlength="3" size="3" name="mip2">.
+                      <input maxlength="3" size="3" name="mip3">.
+                      <input maxlength="3" size="3" name="mip4">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="gr">Default Gateway:&nbsp; </td>
+                    <td><input maxlength="3" size="3" name="gip1">.
+                      <input maxlength="3" size="3" name="gip2">.
+                      <input maxlength="3" size="3" name="gip3">.
+                      <input maxlength="3" size="3" name="gip4">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" rowspan="1" align="center">
+                      <input value="Update Settings" type="submit">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </form>
+
+            <h3>General Configuration Settings</h3>
+            <form action="misc.cgi" method="get">
+              <table border="1" cellpadding="2" cellspacing="2" width="100%">
+                <tbody>
+                  <tr>
+                    <td class="gr">Module Name:</td>
+                    <td><!--#modninp--></td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" rowspan="1" align="center">
+                      <input value="Update Settings" type="submit">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </form>
+
+            <h3>Restore Factory Defaults</h3>
+            <form method="get" action="defaults.cgi" name="defaultform">
+              <table border="1" cellpadding="2" cellspacing="2" width="100%">
+                <tbody>
+                  <tr>
+                    <td class="gr">Restore all options to their factory default states:</td>
+                    <td colspan="2" rowspan="1" align="center">
+                      <input name="mysubmit" value="Restore Defaults" onclick="return CheckMiscDefaults(document.defaultform);" type="submit">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>
