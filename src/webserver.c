@@ -11,14 +11,17 @@
 #include "lwip/apps/httpd.h"
 #include "lwip/def.h"
 #include "lwip/mem.h"
-
 #include "NuMicro.h"
+
+#include "netif/m480_eth.h"
 
 #include "settings.h"
 
 #include <stdio.h>
 #include <string.h>
 
+void cgi_ex_init(void);
+void ssi_ex_init(void);
 const uint8_t my_mac_addr[6] = {0x00, 0x00, 0x00, 0x55, 0x66, 0x77};
 struct netif netif;
 struct Configuration cfg;
@@ -56,8 +59,37 @@ void initDefaultCFG(void)
   strcpy(cfg.modelname, "UxCONN COM");
 }
 
-void initNetwork(void)
+static unsigned int getLinkState(void)
 {
+  /* mii_read (CONFIG_PHY_ADDR, MII_BMSR) */
+  EMAC->MIIMCTL = (CONFIG_PHY_ADDR << EMAC_MIIMCTL_PHYADDR_Pos) | MII_BMSR | EMAC_MIIMCTL_BUSY_Msk | EMAC_MIIMCTL_MDCON_Msk;
+  while (EMAC->MIIMCTL & EMAC_MIIMCTL_BUSY_Msk);
+
+  return (EMAC->MIIMDAT & BMSR_LSTATUS) ? 1 : 0;
+}
+
+#if 0
+void status_callback(struct netif *netif)
+{
+     printf("status changed\n");
+}
+
+void link_callback(struct netif *netif)
+{
+   if (!netif_is_link_up(netif)) {
+     netif_set_link_up(netif);
+     printf("linkup\n");
+   }
+   else {
+      printf("link down\n");
+   }
+}
+#endif
+
+static uint8_t bInitHttpd = 0;
+void vNetworkTask( void * pvParameters )
+{
+    //initNetwork();
     ip_addr_t ipaddr;
     ip_addr_t netmask;
     ip_addr_t gw;
@@ -82,16 +114,36 @@ void initNetwork(void)
 
     tcpip_init(NULL, NULL);
 
-    netif_add(&netif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);
-
-    netif_set_default(&netif);
-    netif_set_up(&netif);
-
     NVIC_SetPriority(EMAC_TX_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY + 1);
     NVIC_EnableIRQ(EMAC_TX_IRQn);
     NVIC_SetPriority(EMAC_RX_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY + 1);
     NVIC_EnableIRQ(EMAC_RX_IRQn);
+
+    for(;;) {
+      if (getLinkState())
+      {
+          if (bInitHttpd == 0) {
+            netif_add(&netif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);
+            netif_set_default(&netif);
+            netif_set_up(&netif);
+            cgi_ex_init();
+            ssi_ex_init();
+            httpd_init();
+            printf("httpd run\n");
+            if (getLinkState()) {
+              bInitHttpd = 1;
+              break;
+            }
+          }
+          vTaskDelay(1000);
+      }
+      vTaskDelay(1000);
+    }
+    printf("webserver task will suspend\n");
+    vTaskDelete(NULL);
+    vTaskSuspend(NULL);
 }
+
 
 /*
  * -------------------------------------------------------------------------------------------------------
@@ -102,16 +154,27 @@ void initNetwork(void)
 #error LWIP_HTTPD_EXAMPLE_CGI_SIMPLE needs LWIP_HTTPD_CGI
 #endif
 
-static const char *cgi_handler_basic(int iIndex, int iNumParams, char *pcParam[], char *pcValue[]);
+static const char *cgi_handler_config(int iIndex, int iNumParams, char *pcParam[], char *pcValue[]);
+static const char *cgi_handler_ip(int iIndex, int iNumParams, char *pcParam[], char *pcValue[]);
+static const char *cgi_handler_misc(int iIndex, int iNumParams, char *pcParam[], char *pcValue[]);
+static const char *cgi_handler_defaults(int iIndex, int iNumParams, char *pcParam[], char *pcValue[]);
 
 static const tCGI cgi_handlers[] = {
   {
-    "/basic_cgi",
-    cgi_handler_basic
+    "/config.cgi",
+    cgi_handler_config
   },
   {
-    "/basic_cgi_2",
-    cgi_handler_basic
+    "/ip.cgi",
+    cgi_handler_ip
+  },
+  {
+    "/misc.cgi",
+    cgi_handler_misc
+  },
+  {
+    "/defaults.cgi",
+    cgi_handler_defaults
   }
 };
 
@@ -121,7 +184,7 @@ cgi_ex_init(void)
   http_set_cgi_handlers(cgi_handlers, LWIP_ARRAYSIZE(cgi_handlers));
 }
 
-/** This basic CGI function can parse param/value pairs and return an url that
+/** This config CGI function can parse param/value pairs and return an url that
  * is sent as a response by httpd.
  *
  * This example function just checks that the input url has two key value
@@ -129,7 +192,7 @@ cgi_ex_init(void)
  * If not, it returns 404
  */
 static const char *
-cgi_handler_basic(int iIndex, int iNumParams, char *pcParam[], char *pcValue[])
+cgi_handler_config(int iIndex, int iNumParams, char *pcParam[], char *pcValue[])
 {
   LWIP_ASSERT("check index", iIndex < LWIP_ARRAYSIZE(cgi_handlers));
 
@@ -146,6 +209,64 @@ cgi_handler_basic(int iIndex, int iNumParams, char *pcParam[], char *pcValue[])
   }
   return "/404.html";
 }
+
+static const char *
+cgi_handler_ip(int iIndex, int iNumParams, char *pcParam[], char *pcValue[])
+{
+  LWIP_ASSERT("check index", iIndex < LWIP_ARRAYSIZE(cgi_handlers));
+
+  if (iNumParams == 2) {
+    if (!strcmp(pcParam[0], "foo")) {
+      if (!strcmp(pcValue[0], "bar")) {
+        if (!strcmp(pcParam[1], "test")) {
+          if (!strcmp(pcValue[1], "123")) {
+            return "/index.html";
+          }
+        }
+      }
+    }
+  }
+  return "/404.html";
+}
+
+static const char *
+cgi_handler_misc(int iIndex, int iNumParams, char *pcParam[], char *pcValue[])
+{
+  LWIP_ASSERT("check index", iIndex < LWIP_ARRAYSIZE(cgi_handlers));
+  //printf("pcParam[0]:%s, pcValue[0]:%s\n", pcParam[0], pcValue[0]);
+  if (iNumParams == 2) {
+    if (!strcmp(pcParam[0], "foo")) {
+      if (!strcmp(pcValue[0], "bar")) {
+        if (!strcmp(pcParam[1], "test")) {
+          if (!strcmp(pcValue[1], "123")) {
+            return "/index.html";
+          }
+        }
+      }
+    }
+  }
+  return "/404.html";
+}
+
+static const char *
+cgi_handler_defaults(int iIndex, int iNumParams, char *pcParam[], char *pcValue[])
+{
+  LWIP_ASSERT("check index", iIndex < LWIP_ARRAYSIZE(cgi_handlers));
+  printf("pcParam[0]:%s, pcValue[0]:%s\n", pcParam[0], pcValue[0]);
+  if (iNumParams == 2) {
+    if (!strcmp(pcParam[0], "foo")) {
+      if (!strcmp(pcValue[0], "bar")) {
+        if (!strcmp(pcParam[1], "test")) {
+          if (!strcmp(pcValue[1], "123")) {
+            return "/index.html";
+          }
+        }
+      }
+    }
+  }
+  return "/404.html";
+}
+
 
 /*
  * -------------------------------------------------------------------------------------------------------
@@ -553,6 +674,10 @@ httpd_cgi_handler(struct fs_file *file, const char* uri, int iNumParams,
 {
   LWIP_UNUSED_ARG(file);
   LWIP_UNUSED_ARG(uri);
+
+  (void)pcParam;
+  (void)pcValue;
+
 #if defined(LWIP_HTTPD_FILE_STATE) && LWIP_HTTPD_FILE_STATE
   if (connection_state != NULL) {
     char *start = (char *)connection_state;

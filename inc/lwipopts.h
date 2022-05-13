@@ -76,7 +76,7 @@
 #define TCPIP_THREAD_NAME             "lwIP"
 #define TCPIP_THREAD_STACKSIZE        ( 512 * 4 )
 #define TCPIP_THREAD_PRIO             tskIDLE_PRIORITY + 5
-
+#define LWIP_TCPIP_CORE_LOCKING        0
 
 #define TCPIP_MBOX_SIZE               16
 #define DEFAULT_RAW_RECVMBOX_SIZE     16
@@ -105,8 +105,8 @@
 #define LWIP_SO_SNDTIMEO              1
 #define LWIP_SO_RCVTIMEO              1
 /*for ip display */
-#define LWIP_NETIF_STATUS_CALLBACK    1
-
+#define LWIP_NETIF_STATUS_CALLBACK    0
+#define LWIP_NETIF_LINK_CALLBACK      0
 #define ETH_PAD_SIZE                  0
 
 

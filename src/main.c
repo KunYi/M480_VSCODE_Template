@@ -111,7 +111,18 @@ static void prepareTasks(void)
                     &xHandle );      /* Used to pass out the created task's handle. */
 
     if( xReturned == pdPASS ) {
+        printf("Successful! Create LEDToggle task\n");
+    }
 
+    xReturned = xTaskCreate(
+                    vNetworkTask,
+                    "NetworkTask",
+                    1024,
+                    (void *) 0,
+                    tskIDLE_PRIORITY,
+                    &xHandle);
+    if( xReturned == pdPASS ) {
+        printf("Successful! Create WebServer task\n");
     }
 }
 
@@ -119,20 +130,15 @@ int main(void) {
     /* Init System, IP clock and multi-function I/O */
     SYS_Init();
     initDefaultCFG();
-    initNetwork();
     UART_Open(UART0, 115200);
     /* Connect UART to PC, and open a terminal tool to receive following message */
     prepareTasks();
 
-    ssi_ex_init();
-    httpd_init();
     printf("FreeRTOS is starting ...\n");
 
-    /* Start the scheduler. */
+    /* Start the scheduler of FreeRTOS */
     vTaskStartScheduler();
 
-    for(;;)
-    {}
     return 0;
 }
 
