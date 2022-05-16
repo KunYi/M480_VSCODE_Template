@@ -374,6 +374,9 @@ const char gateway_vars_fmt[] = \
   "var gip3 = %d;\n"  \
   "var gip4 = %d;\n";
 
+const char modelname_inp_vars_fmt[] = \
+  "<input maxlength=20 name=modelname value=\"%s\">";
+
 u16_t ssi_example_ssi_handler(
 #if LWIP_HTTPD_SSI_RAW
                              const char* ssi_tag_name,
@@ -553,7 +556,7 @@ u16_t ssi_example_ssi_handler(
     }
     break;
   case SSI_IDX_MODNAME_INP:
-    printed = snprintf(pcInsert, iInsertLen, "%s", cfg.modelname);
+    printed = snprintf(pcInsert, iInsertLen, modelname_inp_vars_fmt, cfg.modelname);
     break;
 #if 0
   case 2: /* "MultPart" */
