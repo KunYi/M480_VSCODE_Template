@@ -84,12 +84,12 @@
             </form>
 
             <h3>General Configuration Settings</h3>
-            <form action="misc.cgi" method="get" name="modelnameform">
+            <form action="misc.cgi" method="get">
               <table border="1" cellpadding="2" cellspacing="2" width="100%">
                 <tbody>
                   <tr>
-                    <td class="gr">Model Name:</td>
-                    <td><!--#modninp--></td>
+                    <td class="gr">Device Name:</td>
+                    <td><!--#hstninp--></td>
                   </tr>
                   <tr>
                     <td colspan="2" rowspan="1" align="center">

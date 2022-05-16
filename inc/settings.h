@@ -47,7 +47,7 @@ struct Configuration {
     struct   PortSettings port[SUPPORT_PORTS];
     uint32_t static_ip : 1;
     uint8_t  macaddr[6];
-    char     modelname[20];
+    char     hostname[32];
 } __attribute__((packed));
 
 #endif /* end of #ifndef _SETTINGS_H_ */

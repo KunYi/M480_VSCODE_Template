@@ -71,6 +71,7 @@
 */
 #define LWIP_HTTPD_DYNAMIC_HEADERS  0
 
+#define LWIP_NETIF_HOSTNAME         1
 
 /* tcpip_thread should run on HIGH priority */
 #define TCPIP_THREAD_NAME             "lwIP"

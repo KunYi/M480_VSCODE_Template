@@ -20,9 +20,9 @@
 #include <stdio.h>
 #include <string.h>
 
-void cgi_ex_init(void);
-void ssi_ex_init(void);
-const uint8_t my_mac_addr[6] = {0x00, 0x00, 0x00, 0x55, 0x66, 0x77};
+static void cgi_ex_init(void);
+static void ssi_ex_init(void);
+static const uint8_t mac_addr[6] = {0x00, 0x00, 0x00, 0x55, 0x66, 0x77};
 struct netif netif;
 struct Configuration cfg;
 
@@ -39,7 +39,7 @@ uint8_t getIPField(uint32_t ip, uint8_t idx)
 void initDefaultCFG(void)
 {
   struct PortSettings *port = NULL;
-  memcpy(cfg.macaddr, my_mac_addr, 6);
+  memcpy(cfg.macaddr, mac_addr, 6);
   cfg.gateway = makeIP(192, 168, 10, 1);
   cfg.ip = makeIP(192, 168, 10, 120);
   cfg.netmask = makeIP(255, 255, 255, 0);
@@ -56,7 +56,7 @@ void initDefaultCFG(void)
   port->parity = 0;
   port->stopbits = 0;
   port->flowcontrol = 0;
-  strcpy(cfg.modelname, "UxCONN COM");
+  strcpy(cfg.hostname, "UCOMM");
 }
 
 static unsigned int getLinkState(void)
@@ -93,10 +93,14 @@ void vNetworkTask( void * pvParameters )
     ssi_ex_init();
     httpd_init();
 
+    // initial MAC address of NIC
+    memcpy(netif.hwaddr, cfg.macaddr, 6);
+
     if (NULL == netif_add(&netif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input)) {
       printf("Failed! Init NIC\n");
     }
     else {
+      netif_set_hostname(&netif, cfg.hostname);
       netif_set_default(&netif);
       netif_set_up(&netif);
       netif_set_link_down(&netif);
@@ -155,8 +159,7 @@ static const tCGI cgi_handlers[] = {
   }
 };
 
-void
-cgi_ex_init(void)
+static void cgi_ex_init(void)
 {
   http_set_cgi_handlers(cgi_handlers, LWIP_ARRAYSIZE(cgi_handlers));
 }
@@ -294,7 +297,7 @@ enum  _SSI_TAGS_INDEX {
   SSI_IDX_P0CFG_VARS,
   SSI_IDX_P1CFG_VARS,
   SSI_IDX_MISC_VARS,
-  SSI_IDX_MODNAME_INP,
+  SSI_IDX_HOSTNAME_INP,
 };
 
 const char * ssi_example_tags[] = {
@@ -326,7 +329,7 @@ const char * ssi_example_tags[] = {
   "p0cvars",
   "p1cvars",
   "misvars",
-  "modninp", /* modle name input */
+  "hstninp", /* hostname name input */
 #if LWIP_HTTPD_EXAMPLE_SSI_SIMPLE_CGI_INTEGRATION
   ,"CgiParam"
 #endif
@@ -374,8 +377,8 @@ const char gateway_vars_fmt[] = \
   "var gip3 = %d;\n"  \
   "var gip4 = %d;\n";
 
-const char modelname_inp_vars_fmt[] = \
-  "<input maxlength=20 name=modelname value=\"%s\">";
+const char hostname_inp_vars_fmt[] = \
+  "<input maxlength=32 name=devicename value=\"%s\">";
 
 u16_t ssi_example_ssi_handler(
 #if LWIP_HTTPD_SSI_RAW
@@ -555,8 +558,8 @@ u16_t ssi_example_ssi_handler(
       break;
     }
     break;
-  case SSI_IDX_MODNAME_INP:
-    printed = snprintf(pcInsert, iInsertLen, modelname_inp_vars_fmt, cfg.modelname);
+  case SSI_IDX_HOSTNAME_INP:
+    printed = snprintf(pcInsert, iInsertLen, hostname_inp_vars_fmt, cfg.hostname);
     break;
 #if 0
   case 2: /* "MultPart" */
@@ -604,8 +607,7 @@ u16_t ssi_example_ssi_handler(
   return (u16_t)printed;
 }
 
-void
-ssi_ex_init(void)
+static void ssi_ex_init(void)
 {
   int i;
   for (i = 0; i < LWIP_ARRAYSIZE(ssi_example_tags); i++) {
