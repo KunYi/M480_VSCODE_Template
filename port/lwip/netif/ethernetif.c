@@ -92,13 +92,15 @@ low_level_init(struct netif *netif)
     netif->hwaddr_len = ETHARP_HWADDR_LEN;
 
     /* set MAC hardware address */
+    #if 0
+    /* remove the setting into application */
     netif->hwaddr[0] = my_mac_addr[0];
     netif->hwaddr[1] = my_mac_addr[1];
     netif->hwaddr[2] = my_mac_addr[2];
     netif->hwaddr[3] = my_mac_addr[3];
     netif->hwaddr[4] = my_mac_addr[4];
     netif->hwaddr[5] = my_mac_addr[5];
-
+    #endif
     /* maximum transfer unit */
     netif->mtu = 1500;
 
@@ -363,4 +365,3 @@ ethernetif_init(struct netif *netif)
 
     return ERR_OK;
 }
-
