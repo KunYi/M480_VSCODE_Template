@@ -5,7 +5,10 @@ the repository use submodule for M480 BSP and import lwIP v2.1.3 with FreeRTOS L
 
 * press key **\<CTRL>+\<SHIFT>+B** for launch build task
 * press key **F5** for lauch debugging task
-* press key **\<CTRL>+P** then keyin **task flash with \<Enter>**, will update application by Nu-Link
+
+Flash methods by **Nu-Link**
+1. press **\<CTRL>+\<SHIFT>+P** for Open the Command Palette, then select **Tasks:Run Task/Flash"
+1. press key **\<CTRL>+P** then keyin **task flash with \<Enter>**, will update application by Nu-Link
 
 Visual Studio Code need install the below extensions
 * [ms-vscode.cpptools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)
