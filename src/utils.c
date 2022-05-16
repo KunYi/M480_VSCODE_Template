@@ -1,8 +1,9 @@
 #include <stdint.h>
 #include <stdio.h>
+#include "NuMicro.h"
 
 /*
-  CRC16-CCIT pre-calc table for nibble
+  CRC16-CCITT pre-calc table for nibble
   table[0] = 0x0000,
   table[1] = 0x0000 + 0x1021,
   table[2] = 0x1021 + 0x1021 = 0x2042,
@@ -38,10 +39,10 @@ static uint16_t reverseU16(const uint16_t data) {
          rtab16[data >> 12 & 0xF]);
 }
 
-uint16_t calcCRC16(const uint8_t* pData, const size_t len, uint16_t prev)
+uint16_t calcCRC16(const uint8_t* pData, const size_t len, uint16_t seed)
 {
     uint8_t tmp;
-    uint16_t ret=prev;
+    uint16_t ret=seed;
 
     for (unsigned i = 0; i < len; i++) {
         tmp =  reverseU8(pData[i]);
@@ -49,6 +50,18 @@ uint16_t calcCRC16(const uint8_t* pData, const size_t len, uint16_t prev)
         ret = (uint16_t)(ret << 4 ^ ccit16_tab[(ret >> 12) ^ (tmp & 0xF)]);
     }
     return reverseU16(ret) ^ 0x0000;
+}
+
+uint16_t hwCalcCRC16(const uint8_t *pData, const size_t len, uint16_t seed)
+{
+    CLK_EnableModuleClock(CRC_MODULE);
+    CRC_Open(CRC_CCITT, CRC_CHECKSUM_RVS | CRC_WDATA_RVS, 0x0, CRC_CPU_WDATA_8);
+    for (int i = 0; i < len; i++) {
+      CRC_WRITE_DATA(pData[i]);
+    }
+    uint16_t ret = CRC_GetChecksum() & 0xFFFF;
+    CLK_DisableModuleClock(CRC_MODULE);
+    return ret;
 }
 
 uint32_t makeIP(uint8_t ip1, uint8_t ip2, uint8_t ip3, uint8_t ip4)
