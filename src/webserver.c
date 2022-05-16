@@ -61,35 +61,11 @@ void initDefaultCFG(void)
 
 static unsigned int getLinkState(void)
 {
-  /* mii_read (CONFIG_PHY_ADDR, MII_BMSR) */
-  EMAC->MIIMCTL = (CONFIG_PHY_ADDR << EMAC_MIIMCTL_PHYADDR_Pos) | MII_BMSR | EMAC_MIIMCTL_BUSY_Msk | EMAC_MIIMCTL_MDCON_Msk;
-  while (EMAC->MIIMCTL & EMAC_MIIMCTL_BUSY_Msk);
-
-  return (EMAC->MIIMDAT & BMSR_LSTATUS) ? 1 : 0;
+  return (mdio_read(CONFIG_PHY_ADDR, MII_BMSR) & BMSR_LSTATUS) ? 1 : 0;
 }
 
-#if 0
-void status_callback(struct netif *netif)
-{
-     printf("status changed\n");
-}
-
-void link_callback(struct netif *netif)
-{
-   if (!netif_is_link_up(netif)) {
-     netif_set_link_up(netif);
-     printf("linkup\n");
-   }
-   else {
-      printf("link down\n");
-   }
-}
-#endif
-
-static uint8_t bInitHttpd = 0;
 void vNetworkTask( void * pvParameters )
 {
-    //initNetwork();
     ip_addr_t ipaddr;
     ip_addr_t netmask;
     ip_addr_t gw;
@@ -113,35 +89,36 @@ void vNetworkTask( void * pvParameters )
         getIPField(cfg.netmask, 4));
 
     tcpip_init(NULL, NULL);
+    cgi_ex_init();
+    ssi_ex_init();
+    httpd_init();
 
+    if (NULL == netif_add(&netif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input)) {
+      printf("Failed! Init NIC\n");
+    }
+    else {
+      netif_set_default(&netif);
+      netif_set_up(&netif);
+      netif_set_link_down(&netif);
+    }
     NVIC_SetPriority(EMAC_TX_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY + 1);
     NVIC_EnableIRQ(EMAC_TX_IRQn);
     NVIC_SetPriority(EMAC_RX_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY + 1);
     NVIC_EnableIRQ(EMAC_RX_IRQn);
 
     for(;;) {
-      if (getLinkState())
-      {
-          if (bInitHttpd == 0) {
-            netif_add(&netif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, tcpip_input);
-            netif_set_default(&netif);
-            netif_set_up(&netif);
-            cgi_ex_init();
-            ssi_ex_init();
-            httpd_init();
-            printf("httpd run\n");
-            if (getLinkState()) {
-              bInitHttpd = 1;
-              break;
-            }
-          }
-          vTaskDelay(1000);
+      if (getLinkState()) {
+        if (!netif_is_link_up(&netif)) {
+          reset_phy(); // need negotiation link speed again
+          netif_set_link_up(&netif);
+        }
+      } else {
+        if (netif_is_link_up(&netif)) {
+          netif_set_link_down(&netif);
+        }
       }
-      vTaskDelay(1000);
+      vTaskDelay(500);
     }
-    printf("webserver task will suspend\n");
-    vTaskDelete(NULL);
-    vTaskSuspend(NULL);
 }
 
 

@@ -83,7 +83,7 @@
 
 // Rx Frame Descriptor Status
 #define RXFD_RXGD    0x00100000  // Receiving Good Packet Received
-#define RXFD_RTSAS   0x00800000  // RX Time Stamp Available 
+#define RXFD_RTSAS   0x00800000  // RX Time Stamp Available
 
 
 // Tx Frame Descriptor's Control bits
@@ -127,5 +127,6 @@ void ETH_setinc(void);
 extern void ETH_init(u8_t *mac_addr);
 extern u8_t *ETH_get_tx_buf(void);
 extern void ETH_trigger_tx(u16_t length, struct pbuf *p);
-
+extern u16_t mdio_read(u8_t addr, u8_t reg);
+extern int reset_phy(void);
 #endif  /* _M480_ETH_ */

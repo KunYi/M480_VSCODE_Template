@@ -53,7 +53,7 @@ static void mdio_write(u8_t addr, u8_t reg, u16_t val)
 }
 
 
-static u16_t mdio_read(u8_t addr, u8_t reg)
+u16_t mdio_read(u8_t addr, u8_t reg)
 {
     EMAC->MIIMCTL = (addr << EMAC_MIIMCTL_PHYADDR_Pos) | reg | EMAC_MIIMCTL_BUSY_Msk | EMAC_MIIMCTL_MDCON_Msk;
     while (EMAC->MIIMCTL & EMAC_MIIMCTL_BUSY_Msk);
@@ -61,7 +61,7 @@ static u16_t mdio_read(u8_t addr, u8_t reg)
     return(EMAC->MIIMDAT);
 }
 
-static int reset_phy(void)
+int reset_phy(void)
 {
     u16_t reg;
     u32_t delay;
@@ -102,7 +102,6 @@ static int reset_phy(void)
 
     if(delay == 0)
     {
-        printf("AN failed. Set to 100 FULL\n");
         EMAC->CTL |= (EMAC_CTL_OPMODE_Msk | EMAC_CTL_FUDUP_Msk);
         return(-1);
     }
@@ -112,22 +111,22 @@ static int reset_phy(void)
 
         if(reg & ADVERTISE_100FULL)
         {
-            printf("100 full\n");
+            // printf("100 full\n");
             EMAC->CTL |= (EMAC_CTL_OPMODE_Msk | EMAC_CTL_FUDUP_Msk);
         }
         else if(reg & ADVERTISE_100HALF)
         {
-            printf("100 half\n");
+            // printf("100 half\n");
             EMAC->CTL = (EMAC->CTL & ~EMAC_CTL_FUDUP_Msk) | EMAC_CTL_OPMODE_Msk;
         }
         else if(reg & ADVERTISE_10FULL)
         {
-            printf("10 full\n");
+            // printf("10 full\n");
             EMAC->CTL = (EMAC->CTL & ~EMAC_CTL_OPMODE_Msk) | EMAC_CTL_FUDUP_Msk;
         }
         else
         {
-            printf("10 half\n");
+            // printf("10 half\n");
             EMAC->CTL &= ~(EMAC_CTL_OPMODE_Msk | EMAC_CTL_FUDUP_Msk);
         }
     }
