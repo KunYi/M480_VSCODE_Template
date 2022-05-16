@@ -4,13 +4,16 @@
 #include "lwip/udp.h"
 
 #include "locator.h"
+#include "utils.h"
 
 static struct udp_pcb *udp_raw_pcb;
 static struct UDP_DISCOVERY_RESPONSE reponse;
-static const struct UDP_DISCOVERY_COMMAND discovery_cmd =
-  { .tag[0] = TAG0, .tag[1] = TAG1,
-    .length = sizeof(struct UDP_DISCOVERY_COMMAND),
-    .pktver = 0, .reserv = 0, .crc16 = 0xffff };
+static const struct UDP_DISCOVERY_COMMAND discovery_cmd = {
+  .tag[0] = TAG0, .tag[1] = TAG1,
+  .length = sizeof(struct UDP_DISCOVERY_COMMAND),
+  .command = DISCOVERY_CMD,
+  .pktver = 0, .reserv = 0, .crc16 = DISCOVERY_CRC16
+};
 
 static void
 udp_raw_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p,
@@ -29,6 +32,7 @@ udp_raw_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p,
       if (p == NULL) {
         return;
       }
+      reponse.crc16 = calcCRC16((uint8_t *)&reponse, sizeof(reponse) - 2, 0x0000);
       memcpy(p->payload, &reponse, sizeof(reponse));
       udp_sendto(upcb, p, addr, port);
     }

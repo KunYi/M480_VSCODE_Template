@@ -7,8 +7,7 @@
 #define TAG1            ('C')
 #define DISCOVERY_CMD   (0xFE)
 #define DISCOVERY_VER   (0)
-#define CRC0            (0xFF)
-#define CRC1            (0xFF)
+#define DISCOVERY_CRC16 (0xF1FF)
 
 struct UDP_DISCOVERY_COMMAND {
     uint8_t   tag[2];
