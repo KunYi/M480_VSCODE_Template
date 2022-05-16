@@ -3,9 +3,14 @@
 #include "lwip/stats.h"
 #include "lwip/udp.h"
 
-#define UDP_PORT  (23)
-static struct udp_pcb *udp_raw_pcb;
+#include "locator.h"
 
+static struct udp_pcb *udp_raw_pcb;
+static struct UDP_DISCOVERY_RESPONSE reponse;
+static const struct UDP_DISCOVERY_COMMAND discovery_cmd =
+  { .tag[0] = TAG0, .tag[1] = TAG1,
+    .length = sizeof(struct UDP_DISCOVERY_COMMAND),
+    .pktver = 0, .reserv = 0, .crc16 = 0xffff };
 
 static void
 udp_raw_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p,
@@ -13,8 +18,23 @@ udp_raw_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p,
 {
   LWIP_UNUSED_ARG(arg);
   if (p != NULL) {
-    /* send received packet back to sender */
-    udp_sendto(upcb, p, addr, port);
+    if (p->len == sizeof(struct UDP_DISCOVERY_COMMAND) &&
+        0 == memcmp(&discovery_cmd, p->payload, sizeof(struct UDP_DISCOVERY_COMMAND)))
+    {
+      /* free the pbuf */
+      pbuf_free(p);
+
+      /* send received packet back to sender */
+      p = pbuf_alloc(PBUF_TRANSPORT, sizeof(reponse), PBUF_RAM);
+      if (p == NULL) {
+        return;
+      }
+      memcpy(p->payload, &reponse, sizeof(reponse));
+      udp_sendto(upcb, p, addr, port);
+    }
+  }
+
+  if(p != NULL) {
     /* free the pbuf */
     pbuf_free(p);
   }
@@ -26,7 +46,9 @@ void locator_init(void)
   if (udp_raw_pcb != NULL) {
     err_t err;
 
-    err = udp_bind(udp_raw_pcb, IP_ANY_TYPE, UDP_PORT);
+    memset(&reponse, 0, sizeof(reponse));
+
+    err = udp_bind(udp_raw_pcb, IP_ANY_TYPE, LOCATOR_PORT);
     if (err == ERR_OK) {
       udp_recv(udp_raw_pcb, udp_raw_recv, NULL);
     } else {
