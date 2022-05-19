@@ -58,7 +58,7 @@
 
 #define HTTPD_SUPPORT               1
 #define HTTPD_USE_MEM_POOL          0
-#define LWIP_HTTPD_SUPPORT_POST     0
+#define LWIP_HTTPD_SUPPORT_POST     1
 #define LWIP_HTTPD_CGI              1
 #define LWIP_HTTPD_SSI              1
 #define LWIP_HTTPD_CGI_SSI          1
