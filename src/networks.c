@@ -14,7 +14,7 @@
 
 #include "netif/m480_eth.h"
 
-#include "locator.h"
+#include "udp_service.h"
 #include "settings.h"
 #include "utils.h"
 
@@ -79,7 +79,7 @@ void vNetworkTask( void * pvParameters )
     tcpip_init(NULL, NULL);
     httpd_ext_init();
     httpd_init();
-    locator_init();
+    udpService_init();
 
     // initial MAC address of NIC
     memcpy(netif.hwaddr, cfg.macaddr, 6);

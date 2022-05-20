@@ -5,7 +5,7 @@
 #include "lwip/udp.h"
 
 #include "NuMicro.h"
-#include "locator.h"
+#include "udp_service.h"
 #include "utils.h"
 
 static struct udp_pcb *udp_raw_pcb;
@@ -46,21 +46,14 @@ udp_raw_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p,
   }
 }
 
-void locator_init(void)
+void udpService_init(void)
 {
-  printf("-->locator_init()\n");
   udp_raw_pcb = udp_new_ip_type(IPADDR_TYPE_ANY);
   if (udp_raw_pcb != NULL) {
     err_t err;
-
     memset(&reponse, 0, sizeof(reponse));
 
-    uint16_t hwCRC = hwCalcCRC16((uint8_t*)&discovery_cmd,
-                  sizeof(discovery_cmd) - sizeof(uint16_t),
-                  (uint16_t)0x0000U);
-    uint16_t swCRC = calcCRC16((uint8_t*)&discovery_cmd, sizeof(discovery_cmd) - sizeof(uint16_t), 0);
-    printf("%x:%x\n", hwCRC, swCRC);
-    err = udp_bind(udp_raw_pcb, IP_ANY_TYPE, LOCATOR_PORT);
+    err = udp_bind(udp_raw_pcb, IP_ANY_TYPE, UDP_SERVICE_PORT);
     if (err == ERR_OK) {
       udp_recv(udp_raw_pcb, udp_raw_recv, NULL);
     } else {
@@ -69,5 +62,5 @@ void locator_init(void)
   } else {
     /* abort? output diagnostic? */
   }
-  printf("<--locator_init()\n");
+
 }

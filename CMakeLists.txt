@@ -35,7 +35,7 @@ set(SRC_FILES
     src/main.c
     src/networks.c
     src/webserver.c
-    src/locator.c
+    src/udp_service.c
     src/utils.c
     src/fs.c
     port/lwip/sys_arch.c

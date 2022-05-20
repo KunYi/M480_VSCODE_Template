@@ -1,7 +1,7 @@
-#ifndef _LOCATOR_H_
-#define _LOCATOR_H_
+#ifndef _UDP_SERVICE_H_
+#define _UDP_SERVICE_H_
 
-#define LOCATOR_PORT  (23)
+#define UDP_SERVICE_PORT  (23)
 
 #define TAG0            ('U')
 #define TAG1            ('C')
@@ -35,5 +35,5 @@ struct UDP_DISCOVERY_RESPONSE {
     uint16_t  crc16;          /*  Offset: 74, Size:  2 */
 } __attribute__((packed));    /*  Totoal size: 76bytes */
 
-void locator_init(void);
-#endif /* end of _LOCATOR_H_ */
+void udpService_init(void);
+#endif /* end of _UDP_SERVICE_H_ */
