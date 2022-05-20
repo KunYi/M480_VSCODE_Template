@@ -645,7 +645,7 @@ static uint32_t getUint32Var(const struct pbuf *p, uint32_t *val, const char *fm
   uint16_t tmp;
   uint16_t len;
   char *pValue;
-  char buf[12] = { 0 };
+  char buf[12] = { 0 }; // uint32_t: max value:4294967295, len must < 11
 
   token = pbuf_memfind(p, fmt, lenFmt, 0);
   if (token == 0xFFFF) {
@@ -660,6 +660,8 @@ static uint32_t getUint32Var(const struct pbuf *p, uint32_t *val, const char *fm
   } else {
     len = tmp - value;
   }
+  /* avoid over buffer space */
+  if (len > (sizeof(buf) - 1)) return 0;
 
   memset(buf, 0, sizeof(buf));
   pValue = (char *)pbuf_get_contiguous(p, buf, sizeof(buf), len, value);
