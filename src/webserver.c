@@ -621,6 +621,100 @@ static void *valid_connection;
 static char last_user[USER_PASS_BUFSIZE];
 static uint16_t postPageIndex = 0;
 
+static unsigned isU32Num(const char str[], const unsigned len)
+{
+  uint8_t i;
+
+  if (len > 10)
+    return 0;
+
+  for (i = 0; i < len; i++)
+  {
+    char c = str[i];
+    if (isdigit(c) == 0)
+      return 0;
+  }
+
+  return 1;
+}
+
+static uint32_t getUint32Var(const struct pbuf *p, uint32_t *val, const char *fmt, const uint8_t lenFmt)
+{
+  uint16_t token;
+  uint16_t value;
+  uint16_t tmp;
+  uint16_t len;
+  char *pValue;
+  char buf[12] = { 0 };
+
+  token = pbuf_memfind(p, fmt, lenFmt, 0);
+  if (token == 0xFFFF) {
+    printf("not found:%s\n", buf);
+    return 0;
+  }
+
+  value = token + lenFmt;
+  tmp = pbuf_memfind(p, "&", 1, value);
+  if (tmp == 0xFFFF) {
+    len = p->tot_len - value;
+  } else {
+    len = tmp - value;
+  }
+
+  memset(buf, 0, sizeof(buf));
+  pValue = (char *)pbuf_get_contiguous(p, buf, sizeof(buf), len, value);
+  memcpy(buf, pValue, len);
+  if(isU32Num(buf, len)) {
+    *val = atol(buf);
+    return 1;
+  }
+  return 0;
+}
+
+static uint32_t getIpVar(const struct pbuf *p, const char *fmt, const uint8_t lenFmt)
+{
+  uint8_t i;
+  uint32_t val;
+  uint32_t ip = 0;
+  char buf[8] = { 0 };
+
+  for (i = 1; i <= 4; i++) {
+    snprintf(buf, sizeof(buf) - 1, fmt, i);
+    if ((!getUint32Var(p, &val, buf, lenFmt)) || val > 255)
+      return ~(uint32_t)0;
+    ip += val << (8 * (4 - i));
+  }
+  return ip;
+}
+
+static void procLogin(const struct pbuf *p) {
+
+}
+
+static void procConfig(const struct pbuf *p) {
+  const u16_t token_port = pbuf_memfind(p, "port=", 5, 0);
+  printf("procConfig\n");
+}
+
+static void procIpCfg(const struct pbuf *p) {
+  uint32_t mode = ~(uint32_t)0;
+  const uint32_t static_ip = getIpVar(p, "sip%d=", 5);
+  const uint32_t mask = getIpVar(p, "mip%d=", 5);
+  const uint32_t gateway = getIpVar(p, "gip%d=", 5);
+
+  getUint32Var(p, &mode, "staticip=", 9);
+  printf("procIpCfg, mode:%ld, ip=%08lx, mask=%08lx, gateway=%08lx\n",
+      mode, static_ip, mask, gateway);
+}
+
+static void procMiscCfg(const struct pbuf *p) {
+  printf("procMiscCfg\n");
+}
+
+static void procDefaultCfg(const struct pbuf *p) {
+  printf("procDefaultCfg\n");
+}
+
 struct post_uri {
   const char *uri;
   uint8_t     len_uri;
@@ -635,7 +729,7 @@ enum {
   POST_IDX_DEFAULT_CGI  =   4,
 };
 
-struct post_uri  postPage[] =
+static const struct post_uri  postPage[] =
 {
   { "/login.cgi",     10, "/loginfail.html" },
   { "/config.cgi",    11, "/test.html"},
@@ -643,6 +737,16 @@ struct post_uri  postPage[] =
   { "/ip.cfg",         7, "/test.html"},
   { "/misc.cgi",       9, "/test.html"},
   { "/defaults.cgi",  13, "/test.html"},
+};
+
+typedef void (*procProc)(const struct pbuf *p);
+
+static const procProc procPostVariablesFuncs[] = {
+  procLogin,
+  procConfig,
+  procIpCfg,
+  procMiscCfg,
+  procDefaultCfg,
 };
 
 void dispatchPost(const char *uri, char *response_uri, const u16_t response_uri_len)
@@ -690,13 +794,12 @@ err_t
 httpd_post_receive_data(void *connection, struct pbuf *p)
 {
   if (current_connection == connection) {
-    u16_t token_staticip = pbuf_memfind(p, "staticip=", 9, 0);
-    // u16_t token_sip = pbuf_memfind(p, "sip=", 4, 0);
-
     u16_t token_user = pbuf_memfind(p, "user=", 5, 0);
     u16_t token_pass = pbuf_memfind(p, "pass=", 5, 0);
-    if (token_staticip != 0xFFFF) {
-        printf("find staticip:\n" );
+    const uint8_t procVariableFuns = (sizeof(procPostVariablesFuncs)/sizeof(procProc));
+
+    if (postPageIndex < procVariableFuns) {
+      procPostVariablesFuncs[postPageIndex](p);
     }
 
     if ((token_user != 0xFFFF) && (token_pass != 0xFFFF)) {
