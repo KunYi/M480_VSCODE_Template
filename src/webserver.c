@@ -619,6 +619,48 @@ httpd_cgi_handler(struct fs_file *file, const char* uri, int iNumParams,
 static void *current_connection;
 static void *valid_connection;
 static char last_user[USER_PASS_BUFSIZE];
+static uint16_t postPageIndex = 0;
+
+struct post_uri {
+  const char *uri;
+  uint8_t     len_uri;
+  const char *response;
+};
+
+enum {
+  POST_IDX_LOGIN        =   0,
+  POST_IDX_CONFIG       =   1,
+  POST_IDX_IP_CGI       =   2,
+  POST_IDX_MISC_CGI     =   3,
+  POST_IDX_DEFAULT_CGI  =   4,
+};
+
+struct post_uri  postPage[] =
+{
+  { "/login.cgi",     10, "/loginfail.html" },
+  { "/config.cgi",    11, "/test.html"},
+  /* in misc.shtm */
+  { "/ip.cfg",         7, "/test.html"},
+  { "/misc.cgi",       9, "/test.html"},
+  { "/defaults.cgi",  13, "/test.html"},
+};
+
+void dispatchPost(const char *uri, char *response_uri, const u16_t response_uri_len)
+{
+  const uint8_t pages = (sizeof(postPage)/sizeof(struct post_uri));
+  uint8_t i;
+
+  /* not found */
+  postPageIndex = 0xFFFF;
+  for (i = 0; i < pages; i++) {
+     if (memcmp(postPage[i].uri, uri, postPage[i].len_uri) && (strlen(uri) == postPage[i].len_uri)) {
+        snprintf(response_uri, response_uri_len, postPage[i].response);
+        postPageIndex = i;
+       break;
+     }
+  }
+
+}
 
 err_t
 httpd_post_begin(void *connection, const char *uri, const char *http_request,
@@ -630,12 +672,10 @@ httpd_post_begin(void *connection, const char *uri, const char *http_request,
   LWIP_UNUSED_ARG(http_request_len);
   LWIP_UNUSED_ARG(content_len);
   LWIP_UNUSED_ARG(post_auto_wnd);
-  printf("uri:%s\r\n", uri);
   if (current_connection != connection) {
     current_connection = connection;
     valid_connection = NULL;
-    /* default page is "login failed" */
-    snprintf(response_uri, response_uri_len, "/loginfail.html");
+    dispatchPost(uri, response_uri, response_uri_len);
     /* e.g. for large uploads to slow flash over a fast connection, you should
         manually update the rx window. That way, a sender can only send a full
         tcp window at a time. If this is required, set 'post_aut_wnd' to 0.
@@ -643,14 +683,22 @@ httpd_post_begin(void *connection, const char *uri, const char *http_request,
     *post_auto_wnd = 1;
     return ERR_OK;
   }
+  return ERR_VAL;
 }
 
 err_t
 httpd_post_receive_data(void *connection, struct pbuf *p)
 {
   if (current_connection == connection) {
+    u16_t token_staticip = pbuf_memfind(p, "staticip=", 9, 0);
+    // u16_t token_sip = pbuf_memfind(p, "sip=", 4, 0);
+
     u16_t token_user = pbuf_memfind(p, "user=", 5, 0);
     u16_t token_pass = pbuf_memfind(p, "pass=", 5, 0);
+    if (token_staticip != 0xFFFF) {
+        printf("find staticip:\n" );
+    }
+
     if ((token_user != 0xFFFF) && (token_pass != 0xFFFF)) {
       u16_t value_user = token_user + 5;
       u16_t value_pass = token_pass + 5;
@@ -702,6 +750,7 @@ httpd_post_finished(void *connection, char *response_uri, u16_t response_uri_len
   /* default page is "login failed" */
   snprintf(response_uri, response_uri_len, "/loginfail.html");
   if (current_connection == connection) {
+    printf("post finished\n");
     if (valid_connection == connection) {
       /* login succeeded */
       snprintf(response_uri, response_uri_len, "/session.html");

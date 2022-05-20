@@ -36,7 +36,7 @@
             </table>
 
             <h3>IP Address Selection</h3>
-            <form action="ip.cgi" method="get" name="ip">
+            <form action="ip.cgi" name="ip" method="post">
               <table border="1" cellpadding="2" cellspacing="2" width="100%">
                 <tbody>
                   <tr>
@@ -84,7 +84,7 @@
             </form>
 
             <h3>General Configuration Settings</h3>
-            <form action="misc.cgi" method="get">
+            <form action="misc.cgi" method="post">
               <table border="1" cellpadding="2" cellspacing="2" width="100%">
                 <tbody>
                   <tr>
@@ -101,7 +101,7 @@
             </form>
 
             <h3>Restore Factory Defaults</h3>
-            <form method="get" action="defaults.cgi" name="defaultform">
+            <form action="defaults.cgi" name="defaultform" method="post">
               <table border="1" cellpadding="2" cellspacing="2" width="100%">
                 <tbody>
                   <tr>

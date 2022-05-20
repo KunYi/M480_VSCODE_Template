@@ -43,7 +43,7 @@
             the changes are applied to the port but the existing
             defaults are used whenever the module is next reset.<p>
 
-            <form name="config" action="config.cgi" method="get">
+            <form name="config" action="config.cgi" method="post">
               <input name="port" value="0" type="hidden">
               <table width="100%" border="0" cellpadding="2" cellspacing="2">
                 <tbody>
