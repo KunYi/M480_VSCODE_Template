@@ -41,3 +41,5 @@ you can reference the below picture for downgrade action
 Reference
 ---
 * [Visual Studio Code for C/C++](https://mcuoneclipse.com/2021/05/01/visual-studio-code-for-c-c-with-arm-cortex-m-part-1/)
+* [NuMaker-PFM-M487 Schematic v3.0](docs/PFM-M487/NUMAKER-PFM-M487_V3_0.pdf)
+* [NuMaker-PFM-M487 User Manual Rev1.01](docs/PFM-M487/UM_NuMaker-PFM-M487_User_Manual_EN_Rev1.01.pdf)
