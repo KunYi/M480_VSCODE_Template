@@ -10,6 +10,11 @@
 #include "lwip/apps/httpd.h"
 #include "main.h"
 
+// https://github.com/OpenNuvoton/ISPTool/blob/338ad2d8d6b9758a1ed7cd19e3101a316aedce3c/NuvoISP/DataBase/FlashInfo.cpp#L545
+
+#define  DeviceID_M487JIDAE  (0x00d48750) // LQFP144, Flash:512KB, RAM:160KB
+#define  DeviceID_M487KMCAN  (0x00D4874E) // LQFP128, Flash:2.5MB, RAM:128KB
+
 static void SYS_Init(void)
 {
     /*---------------------------------------------------------------------------------------------------------*/
@@ -79,6 +84,22 @@ static void SYS_Init(void)
     SYS_LockReg();
 }
 
+static void checkDeviceIsM487(void)
+{
+    uint8_t flag = 0;
+    SYS_UnlockReg();                   /* Unlock register lock protect */
+    FMC_Open();                        /* Enable FMC ISP function */
+    const uint32_t pid = FMC_ReadPID();
+    if (DeviceID_M487JIDAE != pid) {
+        printf("FATAL:Not M487JIDAE: DeviceID:0x%08lX\n", pid);
+        flag = 1;
+    }
+    FMC_Close();
+    /* Lock protected registers */
+    SYS_LockReg();
+    while(flag);
+}
+
 /* Task to be created. */
 void vLEDToggleTask( void * pvParameters )
 {
@@ -125,15 +146,15 @@ static void prepareTasks(void)
         printf("Successful! Create WebServer task\n");
     }
 }
-
+extern uint32_t readDevCfg(void);
 int main(void) {
     /* Init System, IP clock and multi-function I/O */
     SYS_Init();
-    initDefaultCFG();
     UART_Open(UART0, 115200);
     /* Connect UART to PC, and open a terminal tool to receive following message */
     prepareTasks();
-
+    checkDeviceIsM487();
+    readDevCfg();
     printf("FreeRTOS is starting ...\n");
 
     /* Start the scheduler of FreeRTOS */

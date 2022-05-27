@@ -20,32 +20,7 @@
 
 extern void httpd_ext_init(void);
 
-static const uint8_t mac_addr[6] = {0x00, 0x00, 0x00, 0x55, 0x66, 0x77};
 struct netif netif;
-struct Configuration cfg;
-
-void initDefaultCFG(void)
-{
-  struct PortSettings *port = NULL;
-  memcpy(cfg.macaddr, mac_addr, 6);
-  cfg.gateway = makeIP(192, 168, 10, 1);
-  cfg.ip = makeIP(192, 168, 10, 120);
-  cfg.netmask = makeIP(255, 255, 255, 0);
-  cfg.static_ip = 1;
-  port = &cfg.port[0];
-  port->baudrate = 115200;
-  port->datalength = 8;
-  port->parity = 0;
-  port->stopbits = 0;
-  port->flowcontrol = 0;
-  port = &cfg.port[1];
-  port->baudrate = 115200;
-  port->datalength = 8;
-  port->parity = 0;
-  port->stopbits = 0;
-  port->flowcontrol = 0;
-  strcpy(cfg.hostname, "UCOMM");
-}
 
 static unsigned int getLinkState(void)
 {

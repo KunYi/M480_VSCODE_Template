@@ -38,6 +38,7 @@ set(SRC_FILES
     src/udp_service.c
     src/utils.c
     src/fs.c
+    src/settings.c
     port/lwip/sys_arch.c
     port/lwip/netif/ethernetif.c
     port/lwip/netif/m480_eth.c

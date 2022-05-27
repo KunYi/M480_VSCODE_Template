@@ -1,6 +1,10 @@
 #ifndef _SETTINGS_H_
 #define _SETTINGS_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SUPPORT_PORTS    (2)
 enum {
     PARITY_NONE = 0,
@@ -23,6 +27,11 @@ enum {
     FLOWCONTROL_XONXOFF,
 };
 
+enum {
+    CFG_DATABLOCK_INUSE  = 0,
+    CFG_DATABLOCK_UNUSE  = 1
+};
+
 struct PortSettings {
     uint32_t baudrate;
     uint8_t  datalength;
@@ -37,8 +46,7 @@ struct PortSettings {
     uint32_t protocol : 1;
     uint8_t  xon;
     uint8_t  xoff;
-} __attribute__((packed));
-
+};
 
 struct Configuration {
     uint32_t ip;
@@ -46,8 +54,29 @@ struct Configuration {
     uint32_t gateway;
     struct   PortSettings port[SUPPORT_PORTS];
     uint32_t static_ip : 1;
+    uint32_t inUse: 1;
+    uint32_t num : 4;
     uint8_t  macaddr[6];
     char     hostname[32];
-} __attribute__((packed));
+    uint8_t  reserv[155]; /* keep the struct size always equal 256bytes */
+    uint16_t crc;
+};
+
+#define SIZE_CONFIGURATION  (256)
+#define MYASSERT(X, msg, ...)   \
+    do { \
+        if (!(X)) { \
+          printf("FATAL@Line %d in %s\n" msg, __LINE__, __FILE__ __VA_OPT__(,) __VA_ARGS__); \
+          for(;;); \
+        } \
+    } while(0)
+
+
+void initCfgStruct(struct Configuration *pCfg);
+extern struct Configuration cfg;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* end of #ifndef _SETTINGS_H_ */
