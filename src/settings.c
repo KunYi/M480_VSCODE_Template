@@ -43,6 +43,7 @@ void initCfgStruct(struct Configuration *pCfg)
     struct PortSettings *port = NULL;
 
     memset(pCfg, 0xff, sizeof(struct Configuration));
+    memset(pCfg->hostname, 0, sizeof(pCfg->hostname));
 
     memcpy(pCfg->macaddr, mac_addr, 6);
     pCfg->ip = makeIP(192, 168, 10, 120);
@@ -53,12 +54,12 @@ void initCfgStruct(struct Configuration *pCfg)
         port = &pCfg->port[i];
         port->baudrate = 115200;
         port->datalength = 8;
-        port->parity = 0;
-        port->stopbits = 0;
-        port->flowcontrol = 0;
+        port->parity = PARITY_NONE;
+        port->stopbits = STOPBIT_1;
+        port->flowcontrol = FLOWCONTROL_NONE;
     }
     pCfg->num = 0;
-    memcpy(pCfg->hostname, "UCOMM", 4);
+    strcpy(pCfg->hostname, "UCOMM");
     pCfg->crc = hwCalcCRC16((const uint8_t *)pCfg, SIZE_CONFIGURATION - 2, 0);
 }
 
