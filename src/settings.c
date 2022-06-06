@@ -69,9 +69,18 @@ void initCfgStruct(struct Configuration *pCfg)
 
 static int32_t writeConfig(int num, struct Configuration *pCfg)
 {
-  const uint32_t addr =  CONFIG_FLASH_START + (SIZE_CONFIGURATION * num);
-  const int32_t  result = FMC_WriteMultiple(addr, (uint32_t *)pCfg, SIZE_CONFIGURATION);
-  MYASSERT(result >= 0, "WrieCofiguration, %ld\n", result);
+  uint32_t addr =  CONFIG_FLASH_START + (SIZE_CONFIGURATION * num);
+  uint32_t *pDat = (uint32_t *)pCfg;
+  int32_t result = 0;
+  for (uint32_t i = 0; i < (SIZE_CONFIGURATION / 8); i++) {
+    int32_t ret = FMC_Write8Bytes(addr, pDat[0], pDat[1]);
+    if (ret < 0)
+      break;
+    result += 8;
+    addr += 8;
+    pDat += 2;
+  }
+  MYASSERT(result == SIZE_CONFIGURATION, "WrieCofiguration, %ld\n", result);
   return result;
 }
 
