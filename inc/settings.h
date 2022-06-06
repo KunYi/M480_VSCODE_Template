@@ -27,9 +27,21 @@ enum {
     FLOWCONTROL_XONXOFF,
 };
 
+// due to Flash erase, value preset '1'
 enum {
     CFG_DATABLOCK_INUSE  = 0,
     CFG_DATABLOCK_UNUSE  = 1
+};
+
+enum {
+    CFG_MODE_RAW = 0,
+    CFG_MODE_TELNET = 1,
+    CFG_MODE_VIRTUAL_COMM = 2,
+};
+
+enum {
+    CFG_PROTOCOL_RAW = 0,
+    CFG_PROTOCOL_485 = 1
 };
 
 struct PortSettings {
@@ -42,7 +54,7 @@ struct PortSettings {
     uint16_t remoteport;
     uint32_t timeout;
     uint32_t ip;
-    uint32_t mode : 1;
+    uint32_t mode : 2;
     uint32_t protocol : 1;
     uint8_t  xon;
     uint8_t  xoff;
