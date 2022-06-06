@@ -25,9 +25,11 @@
             "runToEntryPoint": "main",
             // use NuLink Command tools to flash application binary
             //"preLaunchTask": "Flash",
-            "svdFile": "${workspaceRoot}//device//M481_V1.svd",
+            "device": "M487JIDAE",
+            "svdFile": "${workspaceRoot}//device//M481_v1.svd",
             "showDevDebugOutput": "none",
-            "rtos": "FreeRTOS",
+            "rtos": "FreeRTOS"
+            /*
             "overrideLaunchCommands": [
                 "set mem inaccessible-by-default off",
                 "-enable-pretty-printing",
@@ -35,8 +37,9 @@
                 "monitor reset halt",
                 // to flash application by GDB/OpenOCD/NuLink
                 // "monitor flash write_image erase build//M480_Template.bin",
-                "monitor reset halt",
+                // "monitor reset halt",
             ]
+            */
         }
     ]
 }

@@ -2,5 +2,6 @@
     "files.associations": {
         "stdlib.h": "c",
         "debug.h": "c"
-    }
+    },
+    "cortex-debug.variableUseNaturalFormat": false
 }
