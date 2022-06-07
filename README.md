@@ -2,6 +2,7 @@ Nuvoton M480 with Visual Studio Code development environment
 ===
 
 the repository use submodule for M480 BSP and import lwIP v2.1.3 with FreeRTOS LTS v2021.12.02
+to implement Ethernet to Serial
 
 * press key **\<CTRL>+\<SHIFT>+B** for launch build task
 * press key **F5** for lauch debugging task
@@ -37,6 +38,26 @@ please keep Cortex-Debug is v1.2.2, don't use v1.4.0 ~ v1.4.x.
 currently the new version not work with OpenOCD (v0.10)
 you can reference the below picture for downgrade action
 ![Cortex-Debug](docs/CortexDebugExtensions.png)
+
+------
+Ethernet to Serial
+===
+implement two port to use the below UART instances
+
+1. Port0: UART1
+2. Port1: UART5
+
+Port0 hardware configuration
+* GPIO PH8 - TXD
+* GPIO PH9 - RXD
+* GPIO PB8 - RTS
+* GPIO PB9 - CTS
+
+Port1 hardware configuration
+* GPIO PB2 - CTS
+* GPIO PB3 - RTS
+* GPIO PB4 - RXD
+* GPIO PB5 - TXD
 
 Reference
 ---

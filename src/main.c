@@ -40,8 +40,15 @@ static void SYS_Init(void)
     /* Enable UART clock */
     CLK_EnableModuleClock(UART0_MODULE);
 
+    /* Port0/Port1 map to UART1/UART5 */
+    CLK_EnableModuleClock(UART1_MODULE);
+    CLK_EnableModuleClock(UART5_MODULE);
+
     /* Select UART clock source from HXT */
     CLK_SetModuleClock(UART0_MODULE, CLK_CLKSEL1_UART0SEL_HXT, CLK_CLKDIV0_UART0(1));
+
+    CLK_SetModuleClock(UART1_MODULE, CLK_CLKSEL1_UART1SEL_HXT, CLK_CLKDIV0_UART1(1));
+    CLK_SetModuleClock(UART5_MODULE, CLK_CLKSEL3_UART5SEL_HXT, CLK_CLKDIV4_UART5(1));
 
     /* Enable EMAC clock */
     CLK_EnableModuleClock(EMAC_MODULE);
@@ -57,6 +64,18 @@ static void SYS_Init(void)
     /* Set GPB multi-function pins for UART0 RXD and TXD */
     SYS->GPB_MFPH &= ~(SYS_GPB_MFPH_PB12MFP_Msk | SYS_GPB_MFPH_PB13MFP_Msk);
     SYS->GPB_MFPH |= (SYS_GPB_MFPH_PB12MFP_UART0_RXD | SYS_GPB_MFPH_PB13MFP_UART0_TXD);
+
+    /* Set GPB multi-function pins for UART1 RXD, TXD, CTS and RTS */
+    SYS->GPH_MFPH &= ~(SYS_GPH_MFPH_PH9MFP_Msk | SYS_GPH_MFPH_PH8MFP_Msk);
+    SYS->GPH_MFPH |=  (SYS_GPH_MFPH_PH9MFP_UART1_RXD | SYS_GPH_MFPH_PH8MFP_UART1_TXD);
+    SYS->GPB_MFPH &= ~(SYS_GPB_MFPH_PB9MFP_Msk | SYS_GPB_MFPH_PB8MFP_Msk);
+    SYS->GPB_MFPH |= (SYS_GPB_MFPH_PB9MFP_UART1_nCTS | SYS_GPB_MFPH_PB8MFP_UART1_nRTS);
+
+    /* Set GPB multi-function pins for UART5 RXD, TXD, CTS and RTS */
+    SYS->GPB_MFPL &= ~(SYS_GPB_MFPL_PB2MFP_Msk | SYS_GPB_MFPL_PB3MFP_Msk |
+                        SYS_GPB_MFPL_PB4MFP_Msk | SYS_GPB_MFPL_PB5MFP_Msk);
+    SYS->GPB_MFPL |= ( SYS_GPB_MFPL_PB2MFP_UART5_nCTS |  SYS_GPB_MFPL_PB3MFP_UART5_nRTS |
+                        SYS_GPB_MFPL_PB4MFP_UART5_RXD | SYS_GPB_MFPL_PB5MFP_UART5_TXD);
 
     /* set GPIOH for LED */
     PH->MODE = (PH->MODE & ~(GPIO_MODE_MODE0_Msk | GPIO_MODE_MODE1_Msk | GPIO_MODE_MODE2_Msk)) |
