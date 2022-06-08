@@ -15,6 +15,21 @@
 #define  DeviceID_M487JIDAE  (0x00d48750) // LQFP144, Flash:512KB, RAM:160KB
 #define  DeviceID_M487KMCAN  (0x00D4874E) // LQFP128, Flash:2.5MB, RAM:128KB
 
+#define  ENABLE_PDMA         (0)          // disable, future for highspeed baudrate
+#define  DMA_BUFFER_LENGTH   (1024)
+#define  PDMA_TIME           (0x5555)
+
+enum {
+    PORT0_UART1 = 0,
+    PORT1_UART5,
+    MAX_PORTS
+};
+
+#if ENABLE_PDMA
+static uint8_t PortTxBuffer[MAX_PORTS][DMA_BUFFER_LENGTH];
+static uint8_t PortRxBuffer[MAX_PORTS][DMA_BUFFER_LENGTH];
+#endif
+
 static void SYS_Init(void)
 {
     /*---------------------------------------------------------------------------------------------------------*/
@@ -103,6 +118,83 @@ static void SYS_Init(void)
     SYS_LockReg();
 }
 
+#if ENABLE_PDMA
+void PDMA_Init(void)
+{
+    /* Open PDMA Channel */
+    PDMA_Open(PDMA,1 << 0 | (1 << 1)); // Channel 0, 1 for UART1/UART5 RX, only ch0 and ch1 support PDMA timeout
+    PDMA_Open(PDMA,2 << 1 | (3 << 1)); // Channel 2, 3 for UART1/UART5 TX
+    // Select basic mode
+    PDMA_SetTransferMode(PDMA,0, PDMA_UART1_RX, 0, 0);
+    PDMA_SetTransferMode(PDMA,2, PDMA_UART1_TX, 0, 0);
+    PDMA_SetTransferMode(PDMA,1, PDMA_UART5_RX, 0, 0);
+    PDMA_SetTransferMode(PDMA,3, PDMA_UART5_TX, 0, 0);
+    // Set data width and transfer count
+    PDMA_SetTransferCnt(PDMA,0, PDMA_WIDTH_8, DMA_BUFFER_LENGTH);
+    PDMA_SetTransferCnt(PDMA,2, PDMA_WIDTH_8, DMA_BUFFER_LENGTH);
+    PDMA_SetTransferCnt(PDMA,1, PDMA_WIDTH_8, DMA_BUFFER_LENGTH);
+    PDMA_SetTransferCnt(PDMA,3, PDMA_WIDTH_8, DMA_BUFFER_LENGTH);
+    //Set PDMA Transfer Address
+    PDMA_SetTransferAddr(PDMA,0, UART1_BASE, PDMA_SAR_FIX, ((uint32_t) (&PortRxBuffer[PORT0_UART1][0])), PDMA_DAR_INC);
+    PDMA_SetTransferAddr(PDMA,2, ((uint32_t) (&PortTxBuffer[PORT0_UART1][0])), PDMA_SAR_INC, UART1_BASE, PDMA_DAR_FIX);
+    PDMA_SetTransferAddr(PDMA,1, UART5_BASE, PDMA_SAR_FIX, ((uint32_t) (&PortRxBuffer[PORT1_UART5][0])), PDMA_DAR_INC);
+    PDMA_SetTransferAddr(PDMA,3, ((uint32_t) (&PortTxBuffer[PORT1_UART5][0])), PDMA_SAR_INC, UART5_BASE, PDMA_DAR_FIX);
+    //Select Single Request
+    PDMA_SetBurstType(PDMA,0, PDMA_REQ_SINGLE, 0);
+    PDMA_SetBurstType(PDMA,2, PDMA_REQ_SINGLE, 0);
+    PDMA_SetBurstType(PDMA,1, PDMA_REQ_SINGLE, 0);
+    PDMA_SetBurstType(PDMA,3, PDMA_REQ_SINGLE, 0);
+    PDMA_EnableInt(PDMA,0, 0);
+    PDMA_EnableInt(PDMA,2, 0);
+    PDMA_EnableInt(PDMA,1, 0);
+    PDMA_EnableInt(PDMA,3, 0);
+    NVIC_EnableIRQ(PDMA_IRQn);
+}
+
+/**
+ * @brief       DMA IRQ
+ *
+ * @param       None
+ *
+ * @return      None
+ *
+ * @details     The DMA default IRQ, declared in startup_M480.s.
+ */
+void PDMA_IRQHandler(void)
+{
+    uint32_t status = PDMA_GET_INT_STATUS(PDMA);
+
+    if (status & 0x1)   /* abort */
+    {
+        printf("target abort interrupt !!\n");
+        if (PDMA_GET_ABORT_STS(PDMA) & 0x4)
+        PDMA_CLR_ABORT_FLAG(PDMA,PDMA_GET_ABORT_STS(PDMA));
+    }
+    else if (status & 0x2)     /* done */
+    {
+        if ( (PDMA_GET_TD_STS(PDMA) & (1 << 0)) && (PDMA_GET_TD_STS(PDMA) & (1 << 1)) )
+        {
+
+            PDMA_CLR_TD_FLAG(PDMA,PDMA_GET_TD_STS(PDMA));
+        }
+    }
+    else if (status & 0x300)     /* channel 2 timeout */
+    {
+        printf("timeout interrupt !!\n");
+
+        PDMA_SetTimeOut(PDMA,0, 0, 0);
+        PDMA_CLR_TMOUT_FLAG(PDMA,0);
+        PDMA_SetTimeOut(PDMA,0, 1, PDMA_TIME);
+
+        PDMA_SetTimeOut(PDMA,1, 0, 0);
+        PDMA_CLR_TMOUT_FLAG(PDMA,1);
+        PDMA_SetTimeOut(PDMA,1, 1, PDMA_TIME);
+    }
+    else
+        printf("unknown interrupt !!\n");
+}
+#endif
+
 static void checkDeviceIsM487(void)
 {
     uint8_t flag = 0;
@@ -165,15 +257,91 @@ static void prepareTasks(void)
         printf("Successful! Create WebServer task\n");
     }
 }
+
+static uint32_t convPortDataLen(const uint32_t v)
+{
+    switch (v) {
+    case 5:
+        return UART_WORD_LEN_5;
+    case 6:
+        return UART_WORD_LEN_6;
+    case 7:
+        return UART_WORD_LEN_7;
+    case 8:
+        return UART_WORD_LEN_8;
+    default:
+        MYASSERT(0, "error! data length\n");
+    }
+    return UART_WORD_LEN_8;
+}
+
+static uint32_t convPortParity(const uint32_t v)
+{
+    switch (v) {
+    case PARITY_NONE:
+        return UART_PARITY_NONE;
+    case PARITY_ODD:
+        return UART_PARITY_ODD;
+    case PARITY_EVEN:
+        return UART_PARITY_EVEN;
+    case PARITY_MARK:
+        return UART_PARITY_MARK;
+    case PARITY_SPACE:
+        return UART_PARITY_SPACE;
+    default:
+        MYASSERT(0, "error! parity\n");
+    }
+    return UART_PARITY_NONE;
+}
+
+static uint32_t convPortStopBits(const uint32_t v)
+{
+    switch (v) {
+    case STOPBIT_1:
+        return UART_STOP_BIT_1;
+    case STOPBIT_1D5:
+        return UART_STOP_BIT_1_5;
+    case STOPBIT_2:
+        return UART_STOP_BIT_2;
+    default:
+        MYASSERT(0, "error! stopbits\n");
+    }
+    return UART_STOP_BIT_1;
+}
+
+static void initUART(UART_T *UART,const struct PortSettings *port)
+{
+    const uint32_t dlen = convPortDataLen(port->datalength);
+    const uint32_t parity = convPortParity(port->parity);
+    const uint32_t stopbits = convPortStopBits(port->stopbits);
+
+    UART_Open(UART, port->baudrate);
+    UART_SetLineConfig(UART, 0, dlen, parity, stopbits);
+    UART_DisableFlowCtrl(UART);
+    if (port->flowcontrol == FLOWCONTROL_RTSCTS)
+        UART_EnableFlowCtrl(UART);
+}
+
+static void Ports_Init(void)
+{
+    initUART(UART1, &cfg.port[PORT0_UART1]);
+    initUART(UART5, &cfg.port[PORT1_UART5]);
+}
+
 extern uint32_t readDevCfg(void);
+
 int main(void) {
     /* Init System, IP clock and multi-function I/O */
     SYS_Init();
     UART_Open(UART0, 115200);
-    /* Connect UART to PC, and open a terminal tool to receive following message */
-    prepareTasks();
     checkDeviceIsM487();
     readDevCfg();
+    Ports_Init();
+#if ENABLE_PDMA
+    PDMA_Init();
+#endif
+    /* Connect UART to PC, and open a terminal tool to receive following message */
+    prepareTasks();
     printf("FreeRTOS is starting ...\n");
 
     /* Start the scheduler of FreeRTOS */
