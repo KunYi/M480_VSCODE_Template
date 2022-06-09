@@ -15,7 +15,8 @@
 #include "netif/m480_eth.h"
 
 #include "udp_service.h"
-#include "settings.h"
+#include "tcp_server.h"
+#include "main.h"
 #include "utils.h"
 
 extern void httpd_ext_init(void);
@@ -55,6 +56,7 @@ void vNetworkTask( void * pvParameters )
     httpd_ext_init();
     httpd_init();
     udpService_init();
+    tcpServer_init();
 
     // initial MAC address of NIC
     memcpy(netif.hwaddr, cfg.macaddr, 6);

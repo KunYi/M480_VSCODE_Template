@@ -1,5 +1,5 @@
 #include "NuMicro.h"
-#include "settings.h"
+#include "main.h"
 #include "utils.h"
 #include <string.h>
 
@@ -54,13 +54,14 @@ void initCfgStruct(struct Configuration *pCfg)
   pCfg->netmask = makeIP(255, 255, 255, 0);
   pCfg->static_ip = 1;
   pCfg->inUse = CFG_DATABLOCK_INUSE;
-  for (int i = 0; i < SUPPORT_PORTS; i++) {
+  for (int i = 0; i < MAX_PORTS; i++) {
     port = &pCfg->port[i];
     port->baudrate = 115200;
     port->datalength = 8;
     port->parity = PARITY_NONE;
     port->stopbits = STOPBIT_1;
     port->flowcontrol = FLOWCONTROL_NONE;
+    port->localport = DEFAULT_TCP_DATA_PORT_BASE + i;
   }
   pCfg->num = 0;
   strcpy(pCfg->hostname, "UCOMM");

@@ -5,7 +5,6 @@
 extern "C" {
 #endif
 
-#define SUPPORT_PORTS    (2)
 enum {
     PARITY_NONE = 0,
     PARITY_EVEN,
@@ -44,6 +43,10 @@ enum {
     CFG_PROTOCOL_485 = 1
 };
 
+enum {
+    DEFAULT_TCP_DATA_PORT_BASE = 5000,
+};
+
 struct PortSettings {
     uint32_t baudrate;
     uint8_t  datalength;
@@ -64,7 +67,7 @@ struct Configuration {
     uint32_t ip;
     uint32_t netmask;
     uint32_t gateway;
-    struct   PortSettings port[SUPPORT_PORTS];
+    struct   PortSettings port[MAX_PORTS];
     uint32_t static_ip : 1;
     uint32_t inUse: 1;
     uint32_t num : 4;

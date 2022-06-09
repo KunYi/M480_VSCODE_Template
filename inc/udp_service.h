@@ -1,6 +1,10 @@
 #ifndef _UDP_SERVICE_H_
 #define _UDP_SERVICE_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define UDP_SERVICE_PORT  (23)
 
 #define TAG0            ('U')
@@ -36,4 +40,10 @@ struct UDP_DISCOVERY_RESPONSE {
 } __attribute__((packed));    /*  Totoal size: 76bytes */
 
 void udpService_init(void);
+
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* end of _UDP_SERVICE_H_ */

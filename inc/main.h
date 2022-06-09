@@ -1,8 +1,9 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
-#include "settings.h"
-#include "serial.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 enum {
     PORT0_IDX = 0,
@@ -10,9 +11,15 @@ enum {
     MAX_PORTS
 };
 
+#include "settings.h"
+#include "serial.h"
+
 void initDefaultCFG(void); // defined in src\webserver.c
 void initNetwork(void); // defined in src\webserver.c
-void ssi_ex_init(void);
 void vNetworkTask(void * pvParameters); // defined in src\webserver.c
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* end of #ifndef _MANIN_H_ */

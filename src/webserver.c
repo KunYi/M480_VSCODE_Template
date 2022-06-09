@@ -15,7 +15,7 @@
 
 #include "netif/m480_eth.h"
 
-#include "settings.h"
+#include "main.h"
 #include "utils.h"
 
 #include <stdio.h>
