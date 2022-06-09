@@ -258,57 +258,6 @@ static void prepareTasks(void)
     }
 }
 
-static uint32_t convPortDataLen(const uint32_t v)
-{
-    switch (v) {
-    case 5:
-        return UART_WORD_LEN_5;
-    case 6:
-        return UART_WORD_LEN_6;
-    case 7:
-        return UART_WORD_LEN_7;
-    case 8:
-        return UART_WORD_LEN_8;
-    default:
-        MYASSERT(0, "error! data length\n");
-    }
-    return UART_WORD_LEN_8;
-}
-
-static uint32_t convPortParity(const uint32_t v)
-{
-    switch (v) {
-    case PARITY_NONE:
-        return UART_PARITY_NONE;
-    case PARITY_ODD:
-        return UART_PARITY_ODD;
-    case PARITY_EVEN:
-        return UART_PARITY_EVEN;
-    case PARITY_MARK:
-        return UART_PARITY_MARK;
-    case PARITY_SPACE:
-        return UART_PARITY_SPACE;
-    default:
-        MYASSERT(0, "error! parity\n");
-    }
-    return UART_PARITY_NONE;
-}
-
-static uint32_t convPortStopBits(const uint32_t v)
-{
-    switch (v) {
-    case STOPBIT_1:
-        return UART_STOP_BIT_1;
-    case STOPBIT_1D5:
-        return UART_STOP_BIT_1_5;
-    case STOPBIT_2:
-        return UART_STOP_BIT_2;
-    default:
-        MYASSERT(0, "error! stopbits\n");
-    }
-    return UART_STOP_BIT_1;
-}
-
 static void initUART(UART_T *UART,const struct PortSettings *port)
 {
     const uint32_t dlen = convPortDataLen(port->datalength);

@@ -39,6 +39,7 @@ set(SRC_FILES
     src/utils.c
     src/fs.c
     src/settings.c
+    src/serial.c
     port/lwip/sys_arch.c
     port/lwip/netif/ethernetif.c
     port/lwip/netif/m480_eth.c

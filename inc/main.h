@@ -2,6 +2,7 @@
 #define _MAIN_H_
 
 #include "settings.h"
+#include "serial.h"
 
 void initDefaultCFG(void); // defined in src\webserver.c
 void initNetwork(void); // defined in src\webserver.c
