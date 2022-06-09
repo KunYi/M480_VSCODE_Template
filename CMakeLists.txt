@@ -36,6 +36,7 @@ set(SRC_FILES
     src/networks.c
     src/webserver.c
     src/udp_service.c
+    src/tcp_server.c
     src/utils.c
     src/fs.c
     src/settings.c

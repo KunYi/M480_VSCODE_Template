@@ -19,12 +19,6 @@
 #define  DMA_BUFFER_LENGTH   (1024)
 #define  PDMA_TIME           (0x5555)
 
-enum {
-    PORT0_UART1 = 0,
-    PORT1_UART5,
-    MAX_PORTS
-};
-
 #if ENABLE_PDMA
 static uint8_t PortTxBuffer[MAX_PORTS][DMA_BUFFER_LENGTH];
 static uint8_t PortRxBuffer[MAX_PORTS][DMA_BUFFER_LENGTH];
@@ -135,10 +129,10 @@ void PDMA_Init(void)
     PDMA_SetTransferCnt(PDMA,1, PDMA_WIDTH_8, DMA_BUFFER_LENGTH);
     PDMA_SetTransferCnt(PDMA,3, PDMA_WIDTH_8, DMA_BUFFER_LENGTH);
     //Set PDMA Transfer Address
-    PDMA_SetTransferAddr(PDMA,0, UART1_BASE, PDMA_SAR_FIX, ((uint32_t) (&PortRxBuffer[PORT0_UART1][0])), PDMA_DAR_INC);
-    PDMA_SetTransferAddr(PDMA,2, ((uint32_t) (&PortTxBuffer[PORT0_UART1][0])), PDMA_SAR_INC, UART1_BASE, PDMA_DAR_FIX);
-    PDMA_SetTransferAddr(PDMA,1, UART5_BASE, PDMA_SAR_FIX, ((uint32_t) (&PortRxBuffer[PORT1_UART5][0])), PDMA_DAR_INC);
-    PDMA_SetTransferAddr(PDMA,3, ((uint32_t) (&PortTxBuffer[PORT1_UART5][0])), PDMA_SAR_INC, UART5_BASE, PDMA_DAR_FIX);
+    PDMA_SetTransferAddr(PDMA,0, UART1_BASE, PDMA_SAR_FIX, ((uint32_t) (&PortRxBuffer[PORT0_IDX][0])), PDMA_DAR_INC);
+    PDMA_SetTransferAddr(PDMA,2, ((uint32_t) (&PortTxBuffer[PORT0_IDX][0])), PDMA_SAR_INC, UART1_BASE, PDMA_DAR_FIX);
+    PDMA_SetTransferAddr(PDMA,1, UART5_BASE, PDMA_SAR_FIX, ((uint32_t) (&PortRxBuffer[PORT1_IDX][0])), PDMA_DAR_INC);
+    PDMA_SetTransferAddr(PDMA,3, ((uint32_t) (&PortTxBuffer[PORT1_IDX][0])), PDMA_SAR_INC, UART5_BASE, PDMA_DAR_FIX);
     //Select Single Request
     PDMA_SetBurstType(PDMA,0, PDMA_REQ_SINGLE, 0);
     PDMA_SetBurstType(PDMA,2, PDMA_REQ_SINGLE, 0);
@@ -273,8 +267,8 @@ static void initUART(UART_T *UART,const struct PortSettings *port)
 
 static void Ports_Init(void)
 {
-    initUART(UART1, &cfg.port[PORT0_UART1]);
-    initUART(UART5, &cfg.port[PORT1_UART5]);
+    initUART(UART1, &cfg.port[PORT0_IDX]);
+    initUART(UART5, &cfg.port[PORT1_IDX]);
 }
 
 extern uint32_t readDevCfg(void);

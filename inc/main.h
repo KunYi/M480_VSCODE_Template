@@ -4,6 +4,12 @@
 #include "settings.h"
 #include "serial.h"
 
+enum {
+    PORT0_IDX = 0,
+    PORT1_IDX,
+    MAX_PORTS
+};
+
 void initDefaultCFG(void); // defined in src\webserver.c
 void initNetwork(void); // defined in src\webserver.c
 void ssi_ex_init(void);
